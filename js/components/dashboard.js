@@ -192,7 +192,7 @@ function initCharts(workOrders, assets) {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-          legend: { position: 'bottom', labels: { color: 'var(--text-color)', font: { family: 'Outfit' } } }
+          legend: { position: 'bottom', labels: { color: 'var(--text-color)', font: { family: 'Open Sans' } } }
         }
       }
     });
@@ -228,7 +228,7 @@ function initCharts(workOrders, assets) {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-          legend: { position: 'bottom', labels: { color: 'var(--text-color)', font: { family: 'Outfit' } } }
+          legend: { position: 'bottom', labels: { color: 'var(--text-color)', font: { family: 'Open Sans' } } }
         }
       }
     });
@@ -272,7 +272,7 @@ function initCharts(workOrders, assets) {
           }
         },
         plugins: {
-          legend: { position: 'top', labels: { color: 'var(--text-color)', font: { family: 'Outfit' } } }
+          legend: { position: 'top', labels: { color: 'var(--text-color)', font: { family: 'Open Sans' } } }
         }
       }
     });
