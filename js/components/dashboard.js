@@ -125,7 +125,7 @@ function renderRecentWorkOrders(workOrders) {
 
   const sortedWOs = [...workOrders].sort((a, b) => new Date(b.createdDate) - new Date(a.createdDate)).slice(0, 5);
 
-  tableBody.innerHTML = sortedWOs.map(wo => {
+  tableBody.innerHTML = sortedWOs.map((wo, index) => {
     const priorityClasses = {
       'Darurat': 'status-pill status-red',
       'Tinggi': 'status-pill status-orange',
@@ -144,6 +144,7 @@ function renderRecentWorkOrders(workOrders) {
 
     return `
       <tr>
+        <td><strong>${index + 1}</strong></td>
         <td><strong>${wo.id}</strong></td>
         <td>
           <div class="font-medium">${wo.title}</div>

@@ -5,8 +5,6 @@
 import { StorageManager } from '../storage.js';
 import { formatIDR, formatDate, formatDateTime, showToast, generateID } from '../utils/helpers.js';
 
-let currentWOFilterStatus = 'ALL';
-let currentWOFilterPriority = 'ALL';
 let currentWOSearchTerm = '';
 let currentViewMode = 'list'; // 'list' or 'kanban'
 
@@ -25,15 +23,15 @@ export function renderWorkOrders() {
 
   // Apply filters
   let filtered = workOrders.filter(wo => {
-    const matchStatus = currentWOFilterStatus === 'ALL' || wo.status === currentWOFilterStatus;
-    const matchPriority = currentWOFilterPriority === 'ALL' || wo.priority === currentWOFilterPriority;
-    const matchSearch = !currentWOSearchTerm ||
-      wo.id.toLowerCase().includes(currentWOSearchTerm.toLowerCase()) ||
-      wo.title.toLowerCase().includes(currentWOSearchTerm.toLowerCase()) ||
-      wo.assetName.toLowerCase().includes(currentWOSearchTerm.toLowerCase()) ||
-      (wo.assignedTech && wo.assignedTech.toLowerCase().includes(currentWOSearchTerm.toLowerCase()));
-
-    return matchStatus && matchPriority && matchSearch;
+    if (!currentWOSearchTerm) return true;
+    const term = currentWOSearchTerm.toLowerCase();
+    return wo.id.toLowerCase().includes(term) ||
+           wo.title.toLowerCase().includes(term) ||
+           wo.assetName.toLowerCase().includes(term) ||
+           wo.type.toLowerCase().includes(term) ||
+           wo.priority.toLowerCase().includes(term) ||
+           wo.status.toLowerCase().includes(term) ||
+           (wo.assignedTech && wo.assignedTech.toLowerCase().includes(term));
   });
 
   if (currentViewMode === 'kanban') {
@@ -81,6 +79,7 @@ function renderListView(container, workOrders) {
       <table class="table table-hover">
         <thead>
           <tr>
+            <th>NO</th>
             <th>No. WO</th>
             <th>Judul SPK / Masalah</th>
             <th>Aset</th>
@@ -93,8 +92,9 @@ function renderListView(container, workOrders) {
           </tr>
         </thead>
         <tbody>
-          ${workOrders.map(wo => `
+          ${workOrders.map((wo, index) => `
             <tr>
+              <td><strong>${index + 1}</strong></td>
               <td><strong>${wo.id}</strong></td>
               <td>
                 <div class="font-medium">${wo.title}</div>
@@ -199,22 +199,6 @@ export function setupWorkOrderListeners() {
   if (searchInput) {
     searchInput.addEventListener('input', (e) => {
       currentWOSearchTerm = e.target.value;
-      renderWorkOrders();
-    });
-  }
-
-  const statusFilter = document.getElementById('wo-filter-status');
-  if (statusFilter) {
-    statusFilter.addEventListener('change', (e) => {
-      currentWOFilterStatus = e.target.value;
-      renderWorkOrders();
-    });
-  }
-
-  const priorityFilter = document.getElementById('wo-filter-priority');
-  if (priorityFilter) {
-    priorityFilter.addEventListener('change', (e) => {
-      currentWOFilterPriority = e.target.value;
       renderWorkOrders();
     });
   }
@@ -445,6 +429,7 @@ window.printWorkOrder = function(woId) {
       <table class="table table-bordered spk-parts-table">
         <thead>
           <tr>
+            <th>NO</th>
             <th>Kode Part</th>
             <th>Nama Spare Part</th>
             <th>Jumlah (Qty)</th>
@@ -453,8 +438,9 @@ window.printWorkOrder = function(woId) {
           </tr>
         </thead>
         <tbody>
-          ${wo.partsUsed && wo.partsUsed.length ? wo.partsUsed.map(p => `
+          ${wo.partsUsed && wo.partsUsed.length ? wo.partsUsed.map((p, index) => `
             <tr>
+              <td>${index + 1}</td>
               <td>${p.partId}</td>
               <td>${p.partName}</td>
               <td>${p.qty}</td>

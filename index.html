@@ -65,6 +65,14 @@
           <i data-lucide="bar-chart-3"></i>
           <span>Laporan & Ekspor</span>
         </a>
+        <a href="#" class="nav-item" data-view="team">
+          <i data-lucide="users"></i>
+          <span>Tim & Personil</span>
+        </a>
+        <a href="#" class="nav-item" data-view="vendors">
+          <i data-lucide="building-2"></i>
+          <span>Perusahaan</span>
+        </a>
       </nav>
 
       <div class="sidebar-footer">
@@ -144,6 +152,7 @@
                 <table class="table table-hover">
                   <thead>
                     <tr>
+                      <th>NO</th>
                       <th>No. WO</th>
                       <th>Judul SPK</th>
                       <th>Prioritas</th>
@@ -175,16 +184,6 @@
             </div>
 
             <div class="btn-group">
-              <select id="asset-filter-category" class="form-control">
-                <option value="ALL">Semua Kategori</option>
-              </select>
-              <select id="asset-filter-status" class="form-control">
-                <option value="ALL">Semua Status</option>
-                <option value="Operasional">Operasional</option>
-                <option value="Maintenance">Maintenance</option>
-                <option value="Standby">Standby</option>
-                <option value="Breakdown">Breakdown</option>
-              </select>
               <button class="btn btn-primary" onclick="window.openAssetModal()">
                 <i data-lucide="plus"></i> Tambah Aset
               </button>
@@ -203,21 +202,6 @@
             </div>
 
             <div class="btn-group">
-              <select id="wo-filter-status" class="form-control">
-                <option value="ALL">Semua Status</option>
-                <option value="Disetujui">Disetujui</option>
-                <option value="Dalam Proses">Dalam Proses</option>
-                <option value="Menunggu Part">Menunggu Part</option>
-                <option value="Selesai">Selesai</option>
-                <option value="Dibatalkan">Dibatalkan</option>
-              </select>
-              <select id="wo-filter-priority" class="form-control">
-                <option value="ALL">Semua Prioritas</option>
-                <option value="Darurat">Darurat</option>
-                <option value="Tinggi">Tinggi</option>
-                <option value="Sedang">Sedang</option>
-                <option value="Rendah">Rendah</option>
-              </select>
               <button id="btn-toggle-wo-view" class="btn btn-outline-secondary">
                 <i data-lucide="layout-grid"></i> Kanban View
               </button>
@@ -271,6 +255,38 @@
           <div id="reports-content-container"></div>
         </section>
 
+        <!-- 8. TEAM VIEW -->
+        <section id="view-team" class="view-container">
+          <div class="filter-bar">
+            <div class="search-input-group">
+              <i data-lucide="search"></i>
+              <input type="text" id="team-search" class="form-control" placeholder="Cari nama personil, email, perusahaan, role, atau jabatan...">
+            </div>
+            <div class="btn-group">
+              <button class="btn btn-primary" onclick="window.openTeamModal()">
+                <i data-lucide="user-plus"></i> Tambah Personil
+              </button>
+            </div>
+          </div>
+          <div id="team-list-container"></div>
+        </section>
+
+        <!-- 9. VENDORS VIEW -->
+        <section id="view-vendors" class="view-container">
+          <div class="filter-bar">
+            <div class="search-input-group">
+              <i data-lucide="search"></i>
+              <input type="text" id="vendors-search" class="form-control" placeholder="Cari nama perusahaan, contact person, email, atau alamat...">
+            </div>
+            <div class="btn-group">
+              <button class="btn btn-primary" onclick="window.openVendorModal()">
+                <i data-lucide="building-2"></i> Tambah Perusahaan
+              </button>
+            </div>
+          </div>
+          <div id="vendors-list-container"></div>
+        </section>
+
       </main>
     </div>
   </div>
@@ -295,11 +311,18 @@
             <div>
               <label class="form-label">Kategori *</label>
               <select id="asset-form-category" class="form-control" required>
-                <option value="Mesin Produksi">Mesin Produksi</option>
-                <option value="HVAC">HVAC</option>
                 <option value="Kelistrikan">Kelistrikan</option>
-                <option value="Utilitas">Utilitas</option>
-                <option value="Fasilitas">Fasilitas</option>
+                <option value="Genset">Genset</option>
+                <option value="HVAC">HVAC</option>
+                <option value="Air Bersih">Air Bersih</option>
+                <option value="Grounding & Penyalur Petir">Grounding & Penyalur Petir</option>
+                <option value="CCTV">CCTV</option>
+                <option value="Hydrant">Hydrant</option>
+                <option value="Fire Alarm">Fire Alarm</option>
+                <option value="Video Audio">Video Audio</option>
+                <option value="IPAL">IPAL</option>
+                <option value="Bangunan">Bangunan</option>
+                <option value="Landscape">Landscape</option>
               </select>
             </div>
             <div>
@@ -341,7 +364,7 @@
             </div>
             <div class="form-group-full">
               <label class="form-label">Spesifikasi Teknis</label>
-              <textarea id="asset-form-specs" class="form-control" rows="3" placeholder="Masukan rincian daya, tekanan, kapasitas..."></textarea>
+              <textarea id="asset-form-specs" class="form-control" rows="2" placeholder="Masukan rincian daya, tekanan, kapasitas..."></textarea>
             </div>
           </div>
         </div>
@@ -431,7 +454,7 @@
             </div>
             <div class="form-group-full">
               <label class="form-label">Deskripsi Masalah & Instruksi</label>
-              <textarea id="wo-form-desc" class="form-control" rows="3" placeholder="Jelaskan gejala kerusakan atau instruksi kerja..."></textarea>
+              <textarea id="wo-form-desc" class="form-control" rows="2" placeholder="Jelaskan gejala kerusakan atau instruksi kerja..."></textarea>
             </div>
           </div>
         </div>
@@ -465,7 +488,7 @@
             </div>
             <div class="form-group-full">
               <label class="form-label">Laporan Solusi / Tindakan Perbaikan</label>
-              <textarea id="complete-wo-notes" class="form-control" rows="3" required placeholder="Masukan hasil perbaikan, penggantian suku cadang..."></textarea>
+              <textarea id="complete-wo-notes" class="form-control" rows="2" required placeholder="Masukan hasil perbaikan, penggantian suku cadang..."></textarea>
             </div>
           </div>
         </div>
@@ -533,7 +556,7 @@
             </div>
             <div class="form-group-full">
               <label class="form-label">Poin Checklist PM (Satu per baris)</label>
-              <textarea id="pm-form-checklist" class="form-control" rows="4" placeholder="Cek level oli&#10;Greasing bearing&#10;Pembersihan strainer"></textarea>
+              <textarea id="pm-form-checklist" class="form-control" rows="2" placeholder="Cek level oli&#10;Greasing bearing&#10;Pembersihan strainer"></textarea>
             </div>
           </div>
         </div>
@@ -575,8 +598,8 @@
             </div>
           </div>
 
-          <div class="margin-top-20">
-            <div class="filter-bar" style="margin-bottom: 10px;">
+          <div class="margin-top-10">
+            <div class="filter-bar" style="margin-bottom: 6px;">
               <label class="form-label margin-bottom-0">Item Checklist Inspeksi:</label>
               <button type="button" class="btn btn-sm btn-outline-primary" onclick="window.addChecklistRow()">
                 <i data-lucide="plus"></i> Tambah Item
@@ -658,13 +681,108 @@
             </div>
             <div class="form-group-full">
               <label class="form-label">Supplier / Vendor</label>
-              <input type="text" id="inv-form-supplier" class="form-control" placeholder="Contoh: PT Shell Indonesia">
+              <select id="inv-form-supplier" class="form-control">
+                <option value="">Pilih Supplier / Vendor...</option>
+              </select>
             </div>
           </div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-outline-danger btn-modal-close" onclick="window.closeModal()">Batal</button>
           <button type="submit" class="btn btn-primary">Simpan Spare Part</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal Team Form -->
+  <div id="modal-team-form" class="modal-backdrop">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 id="modal-team-title" class="modal-title">Tambah Personil Tim Baru</h3>
+        <button type="button" class="btn-modal-close" onclick="window.closeModal()">&times;</button>
+      </div>
+      <form id="form-team" onsubmit="window.saveTeamForm(event)">
+        <div class="modal-body">
+          <input type="hidden" id="team-form-id" />
+          <div class="form-grid">
+            <div class="form-group-full">
+              <label class="form-label">Nama Personil *</label>
+              <input type="text" id="team-form-name" class="form-control" required placeholder="Contoh: Ahmad Fauzi">
+            </div>
+            <div>
+              <label class="form-label">No. Telepon / WA *</label>
+              <input type="text" id="team-form-phone" class="form-control" required placeholder="Contoh: 0812-3456-7890">
+            </div>
+            <div>
+              <label class="form-label">Alamat Email *</label>
+              <input type="email" id="team-form-email" class="form-control" required placeholder="ahmad.fauzi@perusahaan.com">
+            </div>
+            <div class="form-group-full">
+              <label class="form-label">Nama Perusahaan / Vendor *</label>
+              <select id="team-form-company" class="form-control" required>
+                <option value="PT Industri Manufaktur Indonesia (Internal)">PT Industri Manufaktur Indonesia (Internal)</option>
+              </select>
+            </div>
+            <div>
+              <label class="form-label">Role Akses *</label>
+              <select id="team-form-role" class="form-control" required>
+                <option value="Teknisi" selected>Teknisi</option>
+                <option value="Supervisor">Supervisor</option>
+                <option value="Manager">Manager</option>
+                <option value="Admin">Admin</option>
+              </select>
+            </div>
+            <div>
+              <label class="form-label">Jabatan *</label>
+              <input type="text" id="team-form-position" class="form-control" required placeholder="Contoh: Senior Mechanical Technician">
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-danger btn-modal-close" onclick="window.closeModal()">Batal</button>
+          <button type="submit" class="btn btn-primary">Simpan Personil</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal Vendor Form -->
+  <div id="modal-vendor-form" class="modal-backdrop">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 id="modal-vendor-title" class="modal-title">Tambah Perusahaan Baru</h3>
+        <button type="button" class="btn-modal-close" onclick="window.closeModal()">&times;</button>
+      </div>
+      <form id="form-vendor" onsubmit="window.saveVendorForm(event)">
+        <div class="modal-body">
+          <input type="hidden" id="vendor-form-id" />
+          <div class="form-grid">
+            <div class="form-group-full">
+              <label class="form-label">Nama Perusahaan *</label>
+              <input type="text" id="vendor-form-name" class="form-control" required placeholder="Contoh: PT Shell Indonesia">
+            </div>
+            <div>
+              <label class="form-label">Contact Person (PIC) *</label>
+              <input type="text" id="vendor-form-contact" class="form-control" required placeholder="Contoh: Hendra Wijaya">
+            </div>
+            <div>
+              <label class="form-label">No. Telepon / HP *</label>
+              <input type="text" id="vendor-form-phone" class="form-control" required placeholder="Contoh: 021-555-1234">
+            </div>
+            <div class="form-group-full">
+              <label class="form-label">Alamat Email Perusahaan</label>
+              <input type="email" id="vendor-form-email" class="form-control" placeholder="sales@perusahaan.com">
+            </div>
+            <div class="form-group-full">
+              <label class="form-label">Alamat Lengkap Kantor / Gudang</label>
+              <textarea id="vendor-form-address" class="form-control" rows="2" placeholder="Masukan alamat jalan, kota, provinsi..."></textarea>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-danger btn-modal-close" onclick="window.closeModal()">Batal</button>
+          <button type="submit" class="btn btn-primary">Simpan Perusahaan</button>
         </div>
       </form>
     </div>

@@ -34,6 +34,7 @@ export function renderInspections() {
       <table class="table table-hover">
         <thead>
           <tr>
+            <th>NO</th>
             <th>Kode Inspeksi</th>
             <th>Judul Inspeksi</th>
             <th>Aset / Peralatan</th>
@@ -45,8 +46,9 @@ export function renderInspections() {
           </tr>
         </thead>
         <tbody>
-          ${inspections.map(insp => `
+          ${inspections.map((insp, index) => `
             <tr>
+              <td><strong>${index + 1}</strong></td>
               <td><strong>${insp.id}</strong></td>
               <td>${insp.title}</td>
               <td>${insp.assetName}</td>
@@ -59,8 +61,8 @@ export function renderInspections() {
                 </span>
               </td>
               <td>
-                <button class="btn btn-sm btn-outline-primary" onclick="window.viewInspectionDetail('${insp.id}')">
-                  <i data-lucide="eye"></i> Detail
+                <button class="btn btn-icon btn-sm btn-outline-primary" title="Lihat Detail Inspeksi" onclick="window.viewInspectionDetail('${insp.id}')">
+                  <i data-lucide="eye"></i>
                 </button>
               </td>
             </tr>
@@ -262,14 +264,16 @@ window.viewInspectionDetail = function(inspId) {
       <table class="table table-striped">
         <thead>
           <tr>
+            <th>NO</th>
             <th>Item Checklist</th>
             <th>Status</th>
             <th>Catatan</th>
           </tr>
         </thead>
         <tbody>
-          ${insp.checklistItems.map(item => `
+          ${insp.checklistItems.map((item, index) => `
             <tr>
+              <td><strong>${index + 1}</strong></td>
               <td>${item.item}</td>
               <td>
                 <span class="badge ${item.status === 'Pass' ? 'badge-success' : item.status === 'Warning' ? 'badge-warning' : 'badge-danger'}">

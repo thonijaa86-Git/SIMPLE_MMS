@@ -12,6 +12,8 @@ import { renderPM } from './components/pm.js';
 import { renderInspections } from './components/inspections.js';
 import { renderInventory, setupInventoryListeners } from './components/inventory.js';
 import { renderReports } from './components/reports.js';
+import { renderTeam, setupTeamListeners } from './components/team.js';
+import { renderVendors, setupVendorListeners } from './components/vendors.js';
 
 let currentView = 'dashboard';
 
@@ -29,6 +31,8 @@ document.addEventListener('DOMContentLoaded', () => {
   setupAssetListeners();
   setupWorkOrderListeners();
   setupInventoryListeners();
+  setupTeamListeners();
+  setupVendorListeners();
 
   // Setup Global Modal Close listeners
   initModals();
@@ -63,7 +67,9 @@ export function navigateTo(viewName) {
     pm: 'Preventive Maintenance (Pemeliharaan Rutin)',
     inspections: 'Pengelolaan Inspeksi & Safety Checklist',
     inventory: 'Manajemen Suku Cadang & Stok',
-    reports: 'Laporan Performa & Ekspor Data'
+    reports: 'Laporan Performa & Ekspor Data',
+    team: 'Pengelolaan Tim & Personil',
+    vendors: 'Pengelolaan Perusahaan'
   };
 
   const titleEl = document.getElementById('page-header-title');
@@ -100,6 +106,12 @@ export function navigateTo(viewName) {
       break;
     case 'reports':
       renderReports();
+      break;
+    case 'team':
+      renderTeam();
+      break;
+    case 'vendors':
+      renderVendors();
       break;
     default:
       renderDashboard();

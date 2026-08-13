@@ -459,15 +459,24 @@ body {
 
 .form-control {
   width: 100%;
-  padding: 10px 14px;
+  padding: 5px 10px;
+  height: 32px;
   background: var(--bg-secondary);
   border: var(--glass-border);
   border-radius: var(--radius-md);
   color: var(--text-color);
-  font-size: 14px;
+  font-size: 12.5px;
   font-family: inherit;
   outline: none;
   transition: border-color var(--transition-speed);
+}
+
+textarea.form-control {
+  height: auto;
+  min-height: 44px;
+  padding: 5px 10px;
+  font-size: 12.5px;
+  resize: vertical;
 }
 
 .form-control:focus {
@@ -704,9 +713,15 @@ select.form-control option {
 .insp-item-row {
   display: grid;
   grid-template-columns: 2fr 1fr 2fr auto;
-  gap: 10px;
-  margin-bottom: 10px;
+  gap: 6px;
+  margin-bottom: 6px;
   align-items: center;
+}
+
+.insp-item-row .form-control {
+  height: 30px;
+  font-size: 12px;
+  padding: 3px 8px;
 }
 
 /* Modals */
@@ -736,8 +751,8 @@ select.form-control option {
   border-radius: var(--radius-lg);
   box-shadow: var(--glass-shadow);
   width: 100%;
-  max-width: 650px;
-  max-height: 90vh;
+  max-width: 680px;
+  max-height: 95vh;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -757,10 +772,10 @@ select.form-control option {
   overflow: hidden;
 }
 
-.modal-dialog-lg { max-width: 850px; }
+.modal-dialog-lg { max-width: 820px; }
 
 .modal-header {
-  padding: 18px 24px;
+  padding: 10px 18px;
   border-bottom: var(--glass-border);
   display: flex;
   align-items: center;
@@ -769,7 +784,7 @@ select.form-control option {
 }
 
 .modal-title {
-  font-size: 18px;
+  font-size: 15px;
   font-weight: 700;
 }
 
@@ -777,34 +792,35 @@ select.form-control option {
   background: transparent;
   border: none;
   color: var(--text-muted);
-  font-size: 24px;
+  font-size: 20px;
+  line-height: 1;
   cursor: pointer;
 }
 
 .btn-modal-close:hover { color: var(--text-color); }
 
 .modal-body {
-  padding: 24px;
+  padding: 12px 18px;
   overflow-y: auto;
   flex: 1;
   min-height: 0;
 }
 
 .modal-footer {
-  padding: 16px 24px;
+  padding: 8px 18px;
   border-top: var(--glass-border);
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 12px;
+  gap: 8px;
   flex-shrink: 0;
   background: var(--bg-secondary);
 }
 
 .modal-footer .btn {
-  height: 42px;
-  padding: 0 20px;
-  font-size: 14px;
+  height: 34px;
+  padding: 0 16px;
+  font-size: 12.5px;
   font-weight: 600;
   display: inline-flex;
   align-items: center;
@@ -815,11 +831,19 @@ select.form-control option {
 .form-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
+  gap: 6px 12px;
 }
 
 .form-group-full { grid-column: span 2; }
-.form-label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: var(--text-color); }
+.form-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  margin-bottom: 2px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
 
 /* Asset Detail Tabs & Details */
 .asset-detail-header {
@@ -1221,7 +1245,7 @@ select.form-control option {
   }
 
   .modal-header {
-    padding: 16px 20px;
+    padding: 10px 16px;
     position: relative;
   }
 
@@ -1239,12 +1263,12 @@ select.form-control option {
   }
 
   .modal-body {
-    padding: 16px 20px;
+    padding: 10px 14px;
   }
 
   .form-grid {
     grid-template-columns: 1fr;
-    gap: 12px;
+    gap: 6px;
   }
 
   .form-group-full {

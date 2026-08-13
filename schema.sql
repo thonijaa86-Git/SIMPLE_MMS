@@ -99,6 +99,29 @@ CREATE TABLE IF NOT EXISTS public.technicians (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now())
 );
 
+-- 7. TEAMS TABLE
+CREATE TABLE IF NOT EXISTS public.teams (
+  id VARCHAR(50) PRIMARY KEY,
+  name VARCHAR(100) NOT NULL,
+  phone VARCHAR(50),
+  email VARCHAR(100),
+  company VARCHAR(150),
+  role VARCHAR(50),
+  position VARCHAR(100),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now())
+);
+
+-- 8. VENDORS TABLE
+CREATE TABLE IF NOT EXISTS public.vendors (
+  id VARCHAR(50) PRIMARY KEY,
+  name VARCHAR(150) NOT NULL,
+  email VARCHAR(100),
+  contact_person VARCHAR(100),
+  phone VARCHAR(50),
+  address TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now())
+);
+
 -- ==========================================================================
 -- ENABLE ROW LEVEL SECURITY (RLS) & PUBLIC READ/WRITE POLICIES
 -- ==========================================================================
@@ -109,6 +132,8 @@ ALTER TABLE public.pm_schedules ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.inspections ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.inventory ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.technicians ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.teams ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.vendors ENABLE ROW LEVEL SECURITY;
 
 -- Create Policies for Anonymous Public Access (Development / Web App Client)
 DROP POLICY IF EXISTS "Public Read Write Assets" ON public.assets;
@@ -128,3 +153,9 @@ CREATE POLICY "Public Read Write Inventory" ON public.inventory FOR ALL USING (t
 
 DROP POLICY IF EXISTS "Public Read Write Technicians" ON public.technicians;
 CREATE POLICY "Public Read Write Technicians" ON public.technicians FOR ALL USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Public Read Write Teams" ON public.teams;
+CREATE POLICY "Public Read Write Teams" ON public.teams FOR ALL USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Public Read Write Vendors" ON public.vendors;
+CREATE POLICY "Public Read Write Vendors" ON public.vendors FOR ALL USING (true) WITH CHECK (true);

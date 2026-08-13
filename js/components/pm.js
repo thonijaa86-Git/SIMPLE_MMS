@@ -40,6 +40,7 @@ export function renderPM() {
       <table class="table table-hover">
         <thead>
           <tr>
+            <th>NO</th>
             <th>Kode PM</th>
             <th>Judul Pemeliharaan</th>
             <th>Aset</th>
@@ -52,8 +53,9 @@ export function renderPM() {
           </tr>
         </thead>
         <tbody>
-          ${pmSchedules.map(pm => `
+          ${pmSchedules.map((pm, index) => `
             <tr>
+              <td><strong>${index + 1}</strong></td>
               <td><strong>${pm.id}</strong></td>
               <td>
                 <div class="font-medium">${pm.title}</div>
@@ -67,8 +69,8 @@ export function renderPM() {
               <td>${pm.assignedTech}</td>
               <td>
                 <div class="btn-group">
-                  <button class="btn btn-sm btn-primary" title="Terbitkan WO Otomatis" onclick="window.triggerWOFromPM('${pm.id}')">
-                    <i data-lucide="play-circle"></i> Generate WO
+                  <button class="btn btn-icon btn-sm btn-primary" title="Generate WO Otomatis" onclick="window.triggerWOFromPM('${pm.id}')">
+                    <i data-lucide="play-circle"></i>
                   </button>
                   <button class="btn btn-icon btn-sm btn-outline-danger" title="Hapus Jadwal" onclick="window.deletePM('${pm.id}')">
                     <i data-lucide="trash-2"></i>

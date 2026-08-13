@@ -90,6 +90,7 @@ export function renderReports() {
         <table class="table table-striped">
           <thead>
             <tr>
+              <th>NO</th>
               <th>Teknisi / Staff</th>
               <th>Total WO Ditugaskan</th>
               <th>WO Selesai</th>
@@ -98,11 +99,12 @@ export function renderReports() {
             </tr>
           </thead>
           <tbody>
-            ${Object.keys(techPerformance).map(tech => {
+            ${Object.keys(techPerformance).map((tech, index) => {
               const stats = techPerformance[tech];
               const pct = stats.total ? Math.round((stats.completed / stats.total) * 100) : 0;
               return `
                 <tr>
+                  <td><strong>${index + 1}</strong></td>
                   <td><strong>${tech}</strong></td>
                   <td>${stats.total} WO</td>
                   <td><span class="badge badge-success">${stats.completed}</span></td>

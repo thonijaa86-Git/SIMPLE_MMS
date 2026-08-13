@@ -11,7 +11,9 @@ const STORAGE_KEYS = {
   PM_SCHEDULES: 'mms_pm_schedules_data',
   INSPECTIONS: 'mms_inspections_data',
   INVENTORY: 'mms_inventory_data',
-  TECHNICIANS: 'mms_technicians_data'
+  TECHNICIANS: 'mms_technicians_data',
+  TEAM: 'mms_team_data',
+  VENDORS: 'mms_vendors_data'
 };
 
 let supabaseClient = null;
@@ -425,6 +427,72 @@ const DEFAULT_TECHNICIANS = [
   { id: 'TCH-004', name: 'Eko Prasetyo', role: 'Teknisi Listrik / Automation', phone: '0811-5566-7788' }
 ];
 
+const DEFAULT_TEAM = [
+  {
+    id: 'TM-001',
+    name: 'Ahmad Fauzi',
+    phone: '0812-3456-7890',
+    email: 'ahmad.fauzi@pt-indonesia.com',
+    company: 'PT Industri Manufaktur Indonesia',
+    role: 'Teknisi',
+    position: 'Senior Mechanical Technician'
+  },
+  {
+    id: 'TM-002',
+    name: 'Budi Santoso',
+    phone: '0813-9876-5432',
+    email: 'budi.santoso@pt-indonesia.com',
+    company: 'PT Industri Manufaktur Indonesia',
+    role: 'Teknisi',
+    position: 'Electrical & Automation Specialist'
+  },
+  {
+    id: 'TM-003',
+    name: 'Citra Dewi',
+    phone: '0811-2233-4455',
+    email: 'citra.dewi@pt-indonesia.com',
+    company: 'PT Industri Manufaktur Indonesia',
+    role: 'Manager',
+    position: 'Maintenance Manager'
+  },
+  {
+    id: 'TM-004',
+    name: 'Dedi Kurniawan',
+    phone: '0815-6677-8899',
+    email: 'dedi.kurniawan@pt-indonesia.com',
+    company: 'PT Industri Manufaktur Indonesia',
+    role: 'Supervisor',
+    position: 'Preventive Maintenance Supervisor'
+  }
+];
+
+const DEFAULT_VENDORS = [
+  {
+    id: 'VND-001',
+    name: 'PT Shell Indonesia',
+    email: 'info@shell-id.com',
+    contactPerson: 'Hendra Wijaya',
+    phone: '021-555-1234',
+    address: 'Jl. TB Simatupang No. 18, Jakarta Selatan'
+  },
+  {
+    id: 'VND-002',
+    name: 'PT SKF Bearings Indonesia',
+    email: 'sales@skf-id.com',
+    contactPerson: 'Maya Putri',
+    phone: '021-888-9900',
+    address: 'Kawasan Industri Pulo Gadung, Jakarta Timur'
+  },
+  {
+    id: 'VND-003',
+    name: 'PT Haas Machinery Indonesia',
+    email: 'support@haas-id.com',
+    contactPerson: 'Rudi Hartono',
+    phone: '021-777-4433',
+    address: 'Kawasan Delta Silicon, Cikarang, Bekasi'
+  }
+];
+
 export class StorageManager {
   static get(key) {
     const data = localStorage.getItem(key);
@@ -454,6 +522,12 @@ export class StorageManager {
     if (!localStorage.getItem(STORAGE_KEYS.TECHNICIANS)) {
       this.set(STORAGE_KEYS.TECHNICIANS, DEFAULT_TECHNICIANS);
     }
+    if (!localStorage.getItem(STORAGE_KEYS.TEAM)) {
+      this.set(STORAGE_KEYS.TEAM, DEFAULT_TEAM);
+    }
+    if (!localStorage.getItem(STORAGE_KEYS.VENDORS)) {
+      this.set(STORAGE_KEYS.VENDORS, DEFAULT_VENDORS);
+    }
   }
 
   // Getters
@@ -463,6 +537,8 @@ export class StorageManager {
   static getInspections() { return this.get(STORAGE_KEYS.INSPECTIONS) || []; }
   static getInventory() { return this.get(STORAGE_KEYS.INVENTORY) || []; }
   static getTechnicians() { return this.get(STORAGE_KEYS.TECHNICIANS) || []; }
+  static getTeam() { return this.get(STORAGE_KEYS.TEAM) || []; }
+  static getVendors() { return this.get(STORAGE_KEYS.VENDORS) || []; }
 
   // Setters
   static saveAssets(assets) {
@@ -488,6 +564,16 @@ export class StorageManager {
   static saveInventory(inv) {
     this.set(STORAGE_KEYS.INVENTORY, inv);
     this.syncInventoryToSupabase(inv);
+  }
+
+  static saveTeam(team) {
+    this.set(STORAGE_KEYS.TEAM, team);
+    this.syncTeamToSupabase(team);
+  }
+
+  static saveVendors(vendors) {
+    this.set(STORAGE_KEYS.VENDORS, vendors);
+    this.syncVendorsToSupabase(vendors);
   }
 
   // Sync helpers to Supabase Cloud
@@ -628,6 +714,49 @@ export class StorageManager {
     }
   }
 
+  static async syncTeamToSupabase(team) {
+    const client = getSupabaseClient();
+    if (!client) return;
+
+    try {
+      const rows = team.map(t => ({
+        id: t.id,
+        name: t.name,
+        phone: t.phone,
+        email: t.email,
+        company: t.company,
+        role: t.role,
+        position: t.position
+      }));
+
+      const { error } = await client.from('teams').upsert(rows);
+      if (error) console.error('Supabase team upsert error:', error);
+    } catch (e) {
+      console.error('Supabase team sync exception:', e);
+    }
+  }
+
+  static async syncVendorsToSupabase(vendors) {
+    const client = getSupabaseClient();
+    if (!client) return;
+
+    try {
+      const rows = vendors.map(v => ({
+        id: v.id,
+        name: v.name,
+        email: v.email,
+        contact_person: v.contactPerson,
+        phone: v.phone,
+        address: v.address
+      }));
+
+      const { error } = await client.from('vendors').upsert(rows);
+      if (error) console.error('Supabase vendors upsert error:', error);
+    } catch (e) {
+      console.error('Supabase vendors sync exception:', e);
+    }
+  }
+
   // 1-Click Sync All Local Data to Supabase
   static async syncAllLocalToSupabase() {
     const client = getSupabaseClient();
@@ -644,6 +773,8 @@ export class StorageManager {
       await this.syncPMSchedulesToSupabase(this.getPMSchedules());
       await this.syncInspectionsToSupabase(this.getInspections());
       await this.syncInventoryToSupabase(this.getInventory());
+      await this.syncTeamToSupabase(this.getTeam());
+      await this.syncVendorsToSupabase(this.getVendors());
 
       showToast('Sinkronisasi ke Supabase Cloud BERHASIL!', 'success');
       return true;
@@ -662,5 +793,7 @@ export class StorageManager {
     this.set(STORAGE_KEYS.INSPECTIONS, DEFAULT_INSPECTIONS);
     this.set(STORAGE_KEYS.INVENTORY, DEFAULT_INVENTORY);
     this.set(STORAGE_KEYS.TECHNICIANS, DEFAULT_TECHNICIANS);
+    this.set(STORAGE_KEYS.TEAM, DEFAULT_TEAM);
+    this.set(STORAGE_KEYS.VENDORS, DEFAULT_VENDORS);
   }
 }

@@ -5,8 +5,6 @@
 import { StorageManager } from '../storage.js';
 import { formatIDR, formatDate, showToast, generateID } from '../utils/helpers.js';
 
-let currentFilterCategory = 'ALL';
-let currentFilterStatus = 'ALL';
 let currentSearchTerm = '';
 
 export function renderAssets() {
@@ -16,20 +14,16 @@ export function renderAssets() {
   const assets = StorageManager.getAssets();
   const workOrders = StorageManager.getWorkOrders();
 
-  // Populate Filter Dropdowns if empty
-  populateCategories(assets);
-
   // Apply filters
   let filtered = assets.filter(asset => {
-    const matchCategory = currentFilterCategory === 'ALL' || asset.category === currentFilterCategory;
-    const matchStatus = currentFilterStatus === 'ALL' || asset.status === currentFilterStatus;
-    const matchSearch = !currentSearchTerm || 
-      asset.name.toLowerCase().includes(currentSearchTerm.toLowerCase()) ||
-      asset.id.toLowerCase().includes(currentSearchTerm.toLowerCase()) ||
-      asset.location.toLowerCase().includes(currentSearchTerm.toLowerCase()) ||
-      (asset.serialNumber && asset.serialNumber.toLowerCase().includes(currentSearchTerm.toLowerCase()));
-
-    return matchCategory && matchStatus && matchSearch;
+    if (!currentSearchTerm) return true;
+    const term = currentSearchTerm.toLowerCase();
+    return asset.name.toLowerCase().includes(term) ||
+           asset.id.toLowerCase().includes(term) ||
+           asset.category.toLowerCase().includes(term) ||
+           asset.status.toLowerCase().includes(term) ||
+           asset.location.toLowerCase().includes(term) ||
+           (asset.serialNumber && asset.serialNumber.toLowerCase().includes(term));
   });
 
   if (filtered.length === 0) {
@@ -65,6 +59,7 @@ export function renderAssets() {
       <table class="table table-hover">
         <thead>
           <tr>
+            <th>NO</th>
             <th>ID Aset</th>
             <th>Nama Aset & Spesifikasi</th>
             <th>Kategori</th>
@@ -77,11 +72,12 @@ export function renderAssets() {
           </tr>
         </thead>
         <tbody>
-          ${filtered.map(asset => {
-            const activeWO = workOrders.filter(w => w.assetId === asset.id && w.status !== 'Selesai').length;
-            
-            return `
+          ${filtered.map((asset, index) => {
+    const activeWO = workOrders.filter(w => w.assetId === asset.id && w.status !== 'Selesai').length;
+
+    return `
               <tr>
+                <td><strong>${index + 1}</strong></td>
                 <td><strong style="color: var(--primary-color);">${asset.id}</strong></td>
                 <td>
                   <div style="font-weight: 600;">${asset.name}</div>
@@ -107,39 +103,26 @@ export function renderAssets() {
                 </td>
                 <td style="text-align: right;">
                   <div class="btn-group" style="justify-content: flex-end;">
-                    <button class="btn btn-sm btn-outline-primary" title="Lihat Detail" onclick="window.viewAssetDetail('${asset.id}')">
-                      <i data-lucide="eye"></i> Detail
+                    <button class="btn btn-icon btn-sm btn-outline-primary" title="Lihat Detail" onclick="window.viewAssetDetail('${asset.id}')">
+                      <i data-lucide="eye"></i>
                     </button>
-                    <button class="btn btn-sm btn-outline-secondary" title="Edit Aset" onclick="window.openAssetModal('${asset.id}')">
-                      <i data-lucide="edit"></i> Edit
+                    <button class="btn btn-icon btn-sm btn-outline-secondary" title="Edit Aset" onclick="window.openAssetModal('${asset.id}')">
+                      <i data-lucide="edit"></i>
                     </button>
-                    <button class="btn btn-sm btn-outline-danger" title="Hapus Aset" onclick="window.deleteAsset('${asset.id}')">
+                    <button class="btn btn-icon btn-sm btn-outline-danger" title="Hapus Aset" onclick="window.deleteAsset('${asset.id}')">
                       <i data-lucide="trash-2"></i>
                     </button>
                   </div>
                 </td>
               </tr>
             `;
-          }).join('')}
+  }).join('')}
         </tbody>
       </table>
     </div>
   `;
 
   if (window.lucide) window.lucide.createIcons();
-}
-
-function populateCategories(assets) {
-  const select = document.getElementById('asset-filter-category');
-  if (!select || select.children.length > 1) return;
-
-  const categories = [...new Set(assets.map(a => a.category))];
-  categories.forEach(cat => {
-    const opt = document.createElement('option');
-    opt.value = cat;
-    opt.textContent = cat;
-    select.appendChild(opt);
-  });
 }
 
 // Bind Filter Listeners
@@ -151,26 +134,10 @@ export function setupAssetListeners() {
       renderAssets();
     });
   }
-
-  const categoryFilter = document.getElementById('asset-filter-category');
-  if (categoryFilter) {
-    categoryFilter.addEventListener('change', (e) => {
-      currentFilterCategory = e.target.value;
-      renderAssets();
-    });
-  }
-
-  const statusFilter = document.getElementById('asset-filter-status');
-  if (statusFilter) {
-    statusFilter.addEventListener('change', (e) => {
-      currentFilterStatus = e.target.value;
-      renderAssets();
-    });
-  }
 }
 
 // Modal Handlers
-window.openAssetModal = function(assetId = null) {
+window.openAssetModal = function (assetId = null) {
   const modal = document.getElementById('modal-asset-form');
   const titleEl = document.getElementById('modal-asset-title');
   const form = document.getElementById('form-asset');
@@ -187,7 +154,19 @@ window.openAssetModal = function(assetId = null) {
     if (asset) {
       document.getElementById('asset-form-id').value = asset.id;
       document.getElementById('asset-form-name').value = asset.name;
-      document.getElementById('asset-form-category').value = asset.category;
+      
+      const catSelect = document.getElementById('asset-form-category');
+      if (catSelect && asset.category) {
+        const optExists = Array.from(catSelect.options).some(opt => opt.value === asset.category);
+        if (!optExists) {
+          const opt = document.createElement('option');
+          opt.value = asset.category;
+          opt.textContent = asset.category;
+          catSelect.appendChild(opt);
+        }
+        catSelect.value = asset.category;
+      }
+      
       document.getElementById('asset-form-location').value = asset.location;
       document.getElementById('asset-form-status').value = asset.status;
       document.getElementById('asset-form-criticality').value = asset.criticality;
@@ -206,7 +185,7 @@ window.openAssetModal = function(assetId = null) {
   if (window.lucide) window.lucide.createIcons();
 };
 
-window.saveAssetForm = function(e) {
+window.saveAssetForm = function (e) {
   if (e) e.preventDefault();
 
   const id = document.getElementById('asset-form-id').value;
@@ -248,7 +227,7 @@ window.saveAssetForm = function(e) {
       name, category, location, status, criticality,
       serialNumber, manufacturer, purchaseCost, purchaseDate, specifications,
       lastMaintenance: new Date().toISOString().slice(0, 10),
-      nextPMDate: new Date(Date.now() + 30*24*60*60*1000).toISOString().slice(0, 10),
+      nextPMDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
       image: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=500&auto=format&fit=crop&q=60'
     };
     assets.unshift(newAsset);
@@ -260,7 +239,7 @@ window.saveAssetForm = function(e) {
   renderAssets();
 };
 
-window.viewAssetDetail = function(assetId) {
+window.viewAssetDetail = function (assetId) {
   const assets = StorageManager.getAssets();
   const workOrders = StorageManager.getWorkOrders();
   const asset = assets.find(a => a.id === assetId);
@@ -324,6 +303,7 @@ window.viewAssetDetail = function(assetId) {
         <table class="table table-striped">
           <thead>
             <tr>
+              <th>NO</th>
               <th>No. WO</th>
               <th>Judul</th>
               <th>Tipe</th>
@@ -332,8 +312,9 @@ window.viewAssetDetail = function(assetId) {
             </tr>
           </thead>
           <tbody>
-            ${assetWOs.length ? assetWOs.map(w => `
+            ${assetWOs.length ? assetWOs.map((w, index) => `
               <tr>
+                <td><strong>${index + 1}</strong></td>
                 <td><strong>${w.id}</strong></td>
                 <td>${w.title}</td>
                 <td>${w.type}</td>
@@ -351,7 +332,7 @@ window.viewAssetDetail = function(assetId) {
   if (window.lucide) window.lucide.createIcons();
 };
 
-window.deleteAsset = function(assetId) {
+window.deleteAsset = function (assetId) {
   if (!confirm(`Apakah Anda yakin ingin menghapus aset ${assetId}?`)) return;
 
   let assets = StorageManager.getAssets();

@@ -42,6 +42,7 @@ export function renderInventory() {
       <table class="table table-hover">
         <thead>
           <tr>
+            <th>NO</th>
             <th>Kode Part</th>
             <th>Nama Suku Cadang</th>
             <th>Kategori</th>
@@ -55,10 +56,11 @@ export function renderInventory() {
           </tr>
         </thead>
         <tbody>
-          ${filtered.map(item => {
+          ${filtered.map((item, index) => {
             const isLowStock = item.stock <= item.minStock;
             return `
               <tr class="${isLowStock ? 'row-low-stock' : ''}">
+                <td><strong>${index + 1}</strong></td>
                 <td><strong>${item.code}</strong></td>
                 <td>
                   <div class="font-medium">${item.name}</div>
@@ -77,13 +79,13 @@ export function renderInventory() {
                 </td>
                 <td>
                   <div class="btn-group">
-                    <button class="btn btn-sm btn-outline-success" title="Tambah Stok (+1)" onclick="window.adjustStock('${item.id}', 1)">
-                      +1
+                    <button class="btn btn-icon btn-sm btn-outline-success" title="Tambah Stok (+1)" onclick="window.adjustStock('${item.id}', 1)">
+                      <i data-lucide="plus"></i>
                     </button>
-                    <button class="btn btn-sm btn-outline-danger" title="Kurangi Stok (-1)" onclick="window.adjustStock('${item.id}', -1)">
-                      -1
+                    <button class="btn btn-icon btn-sm btn-outline-danger" title="Kurangi Stok (-1)" onclick="window.adjustStock('${item.id}', -1)">
+                      <i data-lucide="minus"></i>
                     </button>
-                    <button class="btn btn-icon btn-sm btn-outline-secondary" onclick="window.openInventoryModal('${item.id}')">
+                    <button class="btn btn-icon btn-sm btn-outline-secondary" title="Edit Spare Part" onclick="window.openInventoryModal('${item.id}')">
                       <i data-lucide="edit"></i>
                     </button>
                   </div>
@@ -129,6 +131,25 @@ window.adjustStock = function(itemId, delta) {
   renderInventory();
 };
 
+function populateSupplierSelect(selectedSupplier = '') {
+  const select = document.getElementById('inv-form-supplier');
+  if (!select) return;
+
+  const vendors = StorageManager.getVendors();
+  let optionsHTML = '<option value="">Pilih Supplier / Vendor...</option>';
+
+  vendors.forEach(v => {
+    optionsHTML += `<option value="${v.name}">${v.name}</option>`;
+  });
+
+  if (selectedSupplier && !vendors.some(v => v.name === selectedSupplier)) {
+    optionsHTML += `<option value="${selectedSupplier}">${selectedSupplier}</option>`;
+  }
+
+  select.innerHTML = optionsHTML;
+  if (selectedSupplier) select.value = selectedSupplier;
+}
+
 window.openInventoryModal = function(itemId = null) {
   const modal = document.getElementById('modal-inv-form');
   const titleEl = document.getElementById('modal-inv-title');
@@ -153,11 +174,12 @@ window.openInventoryModal = function(itemId = null) {
       document.getElementById('inv-form-unit').value = item.unit;
       document.getElementById('inv-form-price').value = item.unitPrice;
       document.getElementById('inv-form-location').value = item.location || '';
-      document.getElementById('inv-form-supplier').value = item.supplier || '';
+      populateSupplierSelect(item.supplier || '');
     }
   } else {
     titleEl.textContent = 'Tambah Suku Cadang Baru';
     document.getElementById('inv-form-id').value = '';
+    populateSupplierSelect('');
   }
 
   modal.classList.add('active');
