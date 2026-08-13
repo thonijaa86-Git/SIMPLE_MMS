@@ -16,6 +16,8 @@ CREATE TABLE IF NOT EXISTS public.assets (
   model VARCHAR(100),
   purchase_date DATE,
   purchase_cost NUMERIC(15, 2) DEFAULT 0,
+  year_made INT,
+  installation_year INT,
   last_maintenance DATE,
   next_pm_date DATE,
   specifications TEXT,

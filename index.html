@@ -47,7 +47,7 @@
         </a>
         <a href="#" class="nav-item" data-view="workorders">
           <i data-lucide="file-text"></i>
-          <span>Work Order (SPK)</span>
+          <span>Work Order</span>
         </a>
         <a href="#" class="nav-item" data-view="pm">
           <i data-lucide="calendar"></i>
@@ -105,10 +105,6 @@
 
           <button id="btn-theme-toggle" class="btn btn-icon btn-outline-secondary" title="Ganti Tema Dark/Light">
             <span id="theme-icon"><i data-lucide="sun"></i></span>
-          </button>
-          
-          <button class="btn btn-primary" onclick="window.openWorkOrderModal()">
-            <i data-lucide="plus-circle"></i> <span class="btn-text-responsive">SPK Baru</span>
           </button>
         </div>
       </header>
@@ -183,6 +179,14 @@
               <input type="text" id="asset-search" class="form-control" placeholder="Cari nama aset, ID, lokasi, atau serial number...">
             </div>
 
+            <select id="asset-filter-category" class="form-control" style="max-width: 180px;">
+              <option value="">Semua Kategori</option>
+            </select>
+
+            <select id="asset-filter-location" class="form-control" style="max-width: 180px;">
+              <option value="">Semua Lokasi</option>
+            </select>
+
             <div class="btn-group">
               <button class="btn btn-primary" onclick="window.openAssetModal()">
                 <i data-lucide="plus"></i> Tambah Aset
@@ -206,7 +210,7 @@
                 <i data-lucide="layout-grid"></i> Kanban View
               </button>
               <button class="btn btn-primary" onclick="window.openWorkOrderModal()">
-                <i data-lucide="plus"></i> Buat SPK Baru
+                <i data-lucide="plus"></i> Buat WO
               </button>
             </div>
           </div>
@@ -304,16 +308,23 @@
         <div class="modal-body">
           <input type="hidden" id="asset-form-id" />
           <div class="form-grid">
-            <div class="form-group-full">
-              <label class="form-label">Nama Aset / Peralatan *</label>
-              <input type="text" id="asset-form-name" class="form-control" required placeholder="Contoh: Mesin Milling CNC Haas VF-2">
+            <div>
+              <label class="form-label">No Aset</label>
+              <input type="text" id="asset-form-no-aset" class="form-control" placeholder="Otomatis (Contoh: AST-007)">
+            </div>
+            <div>
+              <label class="form-label">Lokasi *</label>
+              <input type="text" id="asset-form-location" class="form-control" required placeholder="Contoh: Gedung A - Line 1">
             </div>
             <div>
               <label class="form-label">Kategori *</label>
               <select id="asset-form-category" class="form-control" required>
-                <option value="Kelistrikan">Kelistrikan</option>
-                <option value="Genset">Genset</option>
+                <option value="Mesin Produksi">Mesin Produksi</option>
                 <option value="HVAC">HVAC</option>
+                <option value="Kelistrikan">Kelistrikan</option>
+                <option value="Utilitas">Utilitas</option>
+                <option value="Fasilitas">Fasilitas</option>
+                <option value="Genset">Genset</option>
                 <option value="Air Bersih">Air Bersih</option>
                 <option value="Grounding & Penyalur Petir">Grounding & Penyalur Petir</option>
                 <option value="CCTV">CCTV</option>
@@ -326,45 +337,20 @@
               </select>
             </div>
             <div>
-              <label class="form-label">Lokasi *</label>
-              <input type="text" id="asset-form-location" class="form-control" required placeholder="Contoh: Gedung A - Line 1">
+              <label class="form-label">Nama Aset *</label>
+              <input type="text" id="asset-form-name" class="form-control" required placeholder="Contoh: Mesin Milling CNC Haas VF-2">
             </div>
             <div>
-              <label class="form-label">Status Aset</label>
-              <select id="asset-form-status" class="form-control">
-                <option value="Operasional">Operasional</option>
-                <option value="Maintenance">Maintenance</option>
-                <option value="Standby">Standby</option>
-                <option value="Breakdown">Breakdown</option>
-              </select>
+              <label class="form-label">Thn Pembuatan</label>
+              <input type="number" id="asset-form-year-made" class="form-control" placeholder="Contoh: 2022" min="1950" max="2099">
             </div>
             <div>
-              <label class="form-label">Tingkat Kritikalitas</label>
-              <select id="asset-form-criticality" class="form-control">
-                <option value="Tinggi">Tinggi (Critical)</option>
-                <option value="Sedang">Sedang (Medium)</option>
-                <option value="Rendah">Rendah (Low)</option>
-              </select>
-            </div>
-            <div>
-              <label class="form-label">Nomor Seri / S/N</label>
-              <input type="text" id="asset-form-serial" class="form-control" placeholder="Contoh: SN-882910">
-            </div>
-            <div>
-              <label class="form-label">Produsen / Merk</label>
-              <input type="text" id="asset-form-manufacturer" class="form-control" placeholder="Contoh: Caterpillar / Haas">
-            </div>
-            <div>
-              <label class="form-label">Harga Perolehan (IDR)</label>
-              <input type="number" id="asset-form-cost" class="form-control" placeholder="0">
-            </div>
-            <div>
-              <label class="form-label">Tanggal Pembelian</label>
-              <input type="date" id="asset-form-purchase-date" class="form-control">
+              <label class="form-label">Thn Instalasi</label>
+              <input type="number" id="asset-form-installation-year" class="form-control" placeholder="Contoh: 2022" min="1950" max="2099">
             </div>
             <div class="form-group-full">
-              <label class="form-label">Spesifikasi Teknis</label>
-              <textarea id="asset-form-specs" class="form-control" rows="2" placeholder="Masukan rincian daya, tekanan, kapasitas..."></textarea>
+              <label class="form-label">Spesifikasi</label>
+              <textarea id="asset-form-specs" class="form-control" rows="3" placeholder="Masukan rincian spesifikasi teknis, merk, atau S/N..."></textarea>
             </div>
           </div>
         </div>

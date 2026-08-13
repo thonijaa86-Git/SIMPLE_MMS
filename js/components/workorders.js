@@ -51,7 +51,7 @@ function renderListView(container, workOrders) {
         <h3>Tidak ada Work Order yang cocok</h3>
         <p>Coba sesuaikan filter atau tambahkan Work Order baru.</p>
         <button class="btn btn-primary" onclick="window.openWorkOrderModal()">
-          <i data-lucide="plus"></i> Buat Work Order (SPK)
+          <i data-lucide="plus"></i> Buat WO
         </button>
       </div>
     `;

@@ -6,24 +6,37 @@ import { StorageManager } from '../storage.js';
 import { formatIDR, formatDate, showToast, generateID } from '../utils/helpers.js';
 
 let currentSearchTerm = '';
+let currentCategoryFilter = '';
+let currentLocationFilter = '';
 
 export function renderAssets() {
   const container = document.getElementById('assets-list-container');
   if (!container) return;
 
   const assets = StorageManager.getAssets();
-  const workOrders = StorageManager.getWorkOrders();
+
+  // Populate filter dropdown options
+  populateFilterDropdowns(assets);
 
   // Apply filters
   let filtered = assets.filter(asset => {
-    if (!currentSearchTerm) return true;
-    const term = currentSearchTerm.toLowerCase();
-    return asset.name.toLowerCase().includes(term) ||
-           asset.id.toLowerCase().includes(term) ||
-           asset.category.toLowerCase().includes(term) ||
-           asset.status.toLowerCase().includes(term) ||
-           asset.location.toLowerCase().includes(term) ||
-           (asset.serialNumber && asset.serialNumber.toLowerCase().includes(term));
+    if (currentSearchTerm) {
+      const term = currentSearchTerm.toLowerCase();
+      const match = asset.name.toLowerCase().includes(term) ||
+                    asset.id.toLowerCase().includes(term) ||
+                    asset.category.toLowerCase().includes(term) ||
+                    asset.status.toLowerCase().includes(term) ||
+                    asset.location.toLowerCase().includes(term) ||
+                    (asset.serialNumber && asset.serialNumber.toLowerCase().includes(term));
+      if (!match) return false;
+    }
+    if (currentCategoryFilter && asset.category !== currentCategoryFilter) {
+      return false;
+    }
+    if (currentLocationFilter && asset.location !== currentLocationFilter) {
+      return false;
+    }
+    return true;
   });
 
   if (filtered.length === 0) {
@@ -31,7 +44,7 @@ export function renderAssets() {
       <div class="empty-state glass-card">
         <i data-lucide="box-select"></i>
         <h3>Tidak ada aset yang ditemukan</h3>
-        <p>Coba ubah kata kunci pencarian atau filter yang diterapkan.</p>
+        <p>Coba sesuaikan kata kunci pencarian atau filter Kategori & Lokasi.</p>
         <button class="btn btn-primary" onclick="window.openAssetModal()">
           <i data-lucide="plus"></i> Tambah Aset Baru
         </button>
@@ -41,71 +54,39 @@ export function renderAssets() {
     return;
   }
 
-  const statusBadgeClasses = {
-    'Operasional': 'badge-success',
-    'Maintenance': 'badge-warning',
-    'Standby': 'badge-info',
-    'Breakdown': 'badge-danger'
-  };
-
-  const criticalityClasses = {
-    'Tinggi': 'status-pill status-red',
-    'Sedang': 'status-pill status-orange',
-    'Rendah': 'status-pill status-gray'
-  };
-
   container.innerHTML = `
-    <div class="table-responsive glass-card">
+    <div class="table-responsive glass-card padding-0">
       <table class="table table-hover">
         <thead>
           <tr>
-            <th>NO</th>
-            <th>ID Aset</th>
-            <th>Nama Aset & Spesifikasi</th>
-            <th>Kategori</th>
-            <th>Lokasi</th>
-            <th>Status Aset</th>
-            <th>Kritikalitas</th>
-            <th>Next PM</th>
-            <th>WO Aktif</th>
-            <th style="text-align: right;">Aksi</th>
+            <th style="width: 50px;">NO</th>
+            <th>NO ASET</th>
+            <th>LOKASI</th>
+            <th>KATEGORI</th>
+            <th>NAMA ASET</th>
+            <th>SPESIFIKASI</th>
+            <th>THN PEMBUATAN</th>
+            <th>THN INSTALASI</th>
+            <th style="text-align: right;">AKSI</th>
           </tr>
         </thead>
         <tbody>
           ${filtered.map((asset, index) => {
-    const activeWO = workOrders.filter(w => w.assetId === asset.id && w.status !== 'Selesai').length;
+            const yearMade = asset.yearMade || (asset.purchaseDate ? asset.purchaseDate.slice(0, 4) : '2021');
+            const yearInstalled = asset.installationYear || yearMade;
 
-    return `
+            return `
               <tr>
                 <td><strong>${index + 1}</strong></td>
                 <td><strong style="color: var(--primary-color);">${asset.id}</strong></td>
-                <td>
-                  <div style="font-weight: 600;">${asset.name}</div>
-                  <small style="color: var(--text-muted);">${asset.manufacturer || 'S/N: ' + (asset.serialNumber || '-')}</small>
-                </td>
-                <td><span class="badge badge-gray">${asset.category}</span></td>
                 <td><small><i data-lucide="map-pin"></i> ${asset.location}</small></td>
-                <td>
-                  <span class="badge ${statusBadgeClasses[asset.status] || 'badge-gray'}">
-                    ${asset.status}
-                  </span>
-                </td>
-                <td>
-                  <span class="${criticalityClasses[asset.criticality] || ''}">
-                    ${asset.criticality}
-                  </span>
-                </td>
-                <td><small>${formatDate(asset.nextPMDate)}</small></td>
-                <td>
-                  ${activeWO > 0 ? `
-                    <span class="badge badge-warning"><i data-lucide="wrench"></i> ${activeWO} WO</span>
-                  ` : '<span style="color: var(--text-muted);">-</span>'}
-                </td>
+                <td><span class="badge badge-gray">${asset.category}</span></td>
+                <td><div style="font-weight: 600;">${asset.name}</div></td>
+                <td><small style="color: var(--text-muted);">${asset.specifications || asset.manufacturer || (asset.serialNumber ? 'SN: ' + asset.serialNumber : '-')}</small></td>
+                <td><small>${yearMade}</small></td>
+                <td><small>${yearInstalled}</small></td>
                 <td style="text-align: right;">
                   <div class="btn-group" style="justify-content: flex-end;">
-                    <button class="btn btn-icon btn-sm btn-outline-primary" title="Lihat Detail" onclick="window.viewAssetDetail('${asset.id}')">
-                      <i data-lucide="eye"></i>
-                    </button>
                     <button class="btn btn-icon btn-sm btn-outline-secondary" title="Edit Aset" onclick="window.openAssetModal('${asset.id}')">
                       <i data-lucide="edit"></i>
                     </button>
@@ -116,7 +97,7 @@ export function renderAssets() {
                 </td>
               </tr>
             `;
-  }).join('')}
+          }).join('')}
         </tbody>
       </table>
     </div>
@@ -125,12 +106,53 @@ export function renderAssets() {
   if (window.lucide) window.lucide.createIcons();
 }
 
+function populateFilterDropdowns(assets) {
+  const catSelect = document.getElementById('asset-filter-category');
+  const locSelect = document.getElementById('asset-filter-location');
+
+  if (catSelect && catSelect.options.length <= 1) {
+    const categories = Array.from(new Set(assets.map(a => a.category).filter(Boolean))).sort();
+    categories.forEach(cat => {
+      const opt = document.createElement('option');
+      opt.value = cat;
+      opt.textContent = cat;
+      catSelect.appendChild(opt);
+    });
+  }
+
+  if (locSelect && locSelect.options.length <= 1) {
+    const locations = Array.from(new Set(assets.map(a => a.location).filter(Boolean))).sort();
+    locations.forEach(loc => {
+      const opt = document.createElement('option');
+      opt.value = loc;
+      opt.textContent = loc;
+      locSelect.appendChild(opt);
+    });
+  }
+}
+
 // Bind Filter Listeners
 export function setupAssetListeners() {
   const searchInput = document.getElementById('asset-search');
   if (searchInput) {
     searchInput.addEventListener('input', (e) => {
       currentSearchTerm = e.target.value;
+      renderAssets();
+    });
+  }
+
+  const catSelect = document.getElementById('asset-filter-category');
+  if (catSelect) {
+    catSelect.addEventListener('change', (e) => {
+      currentCategoryFilter = e.target.value;
+      renderAssets();
+    });
+  }
+
+  const locSelect = document.getElementById('asset-filter-location');
+  if (locSelect) {
+    locSelect.addEventListener('change', (e) => {
+      currentLocationFilter = e.target.value;
       renderAssets();
     });
   }
@@ -153,7 +175,10 @@ window.openAssetModal = function (assetId = null) {
 
     if (asset) {
       document.getElementById('asset-form-id').value = asset.id;
-      document.getElementById('asset-form-name').value = asset.name;
+      if (document.getElementById('asset-form-no-aset')) {
+        document.getElementById('asset-form-no-aset').value = asset.id;
+      }
+      document.getElementById('asset-form-location').value = asset.location || '';
       
       const catSelect = document.getElementById('asset-form-category');
       if (catSelect && asset.category) {
@@ -167,18 +192,27 @@ window.openAssetModal = function (assetId = null) {
         catSelect.value = asset.category;
       }
       
-      document.getElementById('asset-form-location').value = asset.location;
-      document.getElementById('asset-form-status').value = asset.status;
-      document.getElementById('asset-form-criticality').value = asset.criticality;
-      document.getElementById('asset-form-serial').value = asset.serialNumber || '';
-      document.getElementById('asset-form-manufacturer').value = asset.manufacturer || '';
-      document.getElementById('asset-form-cost').value = asset.purchaseCost || 0;
-      document.getElementById('asset-form-purchase-date').value = asset.purchaseDate || '';
+      document.getElementById('asset-form-name').value = asset.name || '';
+      if (document.getElementById('asset-form-year-made')) {
+        document.getElementById('asset-form-year-made').value = asset.yearMade || (asset.purchaseDate ? asset.purchaseDate.slice(0, 4) : '');
+      }
+      if (document.getElementById('asset-form-installation-year')) {
+        document.getElementById('asset-form-installation-year').value = asset.installationYear || (asset.purchaseDate ? asset.purchaseDate.slice(0, 4) : '');
+      }
       document.getElementById('asset-form-specs').value = asset.specifications || '';
     }
   } else {
     titleEl.textContent = 'Tambah Aset Baru';
     document.getElementById('asset-form-id').value = '';
+    if (document.getElementById('asset-form-no-aset')) {
+      document.getElementById('asset-form-no-aset').value = generateID('AST');
+    }
+    if (document.getElementById('asset-form-year-made')) {
+      document.getElementById('asset-form-year-made').value = new Date().getFullYear();
+    }
+    if (document.getElementById('asset-form-installation-year')) {
+      document.getElementById('asset-form-installation-year').value = new Date().getFullYear();
+    }
   }
 
   modal.classList.add('active');
@@ -189,19 +223,16 @@ window.saveAssetForm = function (e) {
   if (e) e.preventDefault();
 
   const id = document.getElementById('asset-form-id').value;
-  const name = document.getElementById('asset-form-name').value.trim();
-  const category = document.getElementById('asset-form-category').value;
+  const customNoAset = document.getElementById('asset-form-no-aset')?.value.trim();
   const location = document.getElementById('asset-form-location').value.trim();
-  const status = document.getElementById('asset-form-status').value;
-  const criticality = document.getElementById('asset-form-criticality').value;
-  const serialNumber = document.getElementById('asset-form-serial').value.trim();
-  const manufacturer = document.getElementById('asset-form-manufacturer').value.trim();
-  const purchaseCost = parseFloat(document.getElementById('asset-form-cost').value) || 0;
-  const purchaseDate = document.getElementById('asset-form-purchase-date').value;
+  const category = document.getElementById('asset-form-category').value;
+  const name = document.getElementById('asset-form-name').value.trim();
+  const yearMade = parseInt(document.getElementById('asset-form-year-made')?.value) || new Date().getFullYear();
+  const installationYear = parseInt(document.getElementById('asset-form-installation-year')?.value) || yearMade;
   const specifications = document.getElementById('asset-form-specs').value.trim();
 
   if (!name || !category || !location) {
-    showToast('Harap isi bidang Nama, Kategori, dan Lokasi Aset.', 'warning');
+    showToast('Harap isi bidang Nama Aset, Kategori, dan Lokasi.', 'warning');
     return;
   }
 
@@ -213,8 +244,7 @@ window.saveAssetForm = function (e) {
       if (a.id === id) {
         return {
           ...a,
-          name, category, location, status, criticality,
-          serialNumber, manufacturer, purchaseCost, purchaseDate, specifications
+          name, category, location, yearMade, installationYear, specifications
         };
       }
       return a;
@@ -222,10 +252,13 @@ window.saveAssetForm = function (e) {
     showToast(`Aset ${id} berhasil diperbarui`, 'success');
   } else {
     // Insert
+    const newAssetId = customNoAset || generateID('AST');
     const newAsset = {
-      id: generateID('AST'),
-      name, category, location, status, criticality,
-      serialNumber, manufacturer, purchaseCost, purchaseDate, specifications,
+      id: newAssetId,
+      name, category, location,
+      status: 'Operasional',
+      criticality: 'Sedang',
+      yearMade, installationYear, specifications,
       lastMaintenance: new Date().toISOString().slice(0, 10),
       nextPMDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
       image: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=500&auto=format&fit=crop&q=60'
@@ -339,6 +372,15 @@ window.deleteAsset = function (assetId) {
   assets = assets.filter(a => a.id !== assetId);
 
   StorageManager.saveAssets(assets);
+
+  // Delete from Supabase cloud database if configured
+  const client = StorageManager.getSupabaseClient ? StorageManager.getSupabaseClient() : null;
+  if (client) {
+    client.from('assets').delete().eq('id', assetId).then(({ error }) => {
+      if (error) console.error('Supabase delete asset error:', error);
+    });
+  }
+
   showToast(`Aset ${assetId} berhasil dihapus`, 'success');
   renderAssets();
 };
