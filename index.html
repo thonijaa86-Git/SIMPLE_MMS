@@ -6,9 +6,10 @@
   <title>Maintenance Management System (MMS)</title>
   <meta name="description" content="Sistem Pengelolaan Pemeliharaan Aset, Work Order, Preventive Maintenance, Inspeksi, dan Suku Cadang">
 
-  <!-- Lucide Icons & Chart.js -->
+  <!-- Lucide Icons, Chart.js & Supabase Client -->
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <!-- Master CSS -->
   <link rel="stylesheet" href="css/main.css">
@@ -90,6 +91,10 @@
         </div>
 
         <div class="topbar-right">
+          <button id="btn-supabase-status" class="btn btn-sm btn-outline-secondary" onclick="window.openSupabaseModal()" title="Pengaturan Database Supabase">
+            <span id="supabase-status-badge" class="badge badge-gray"><i data-lucide="database"></i> Supabase</span>
+          </button>
+
           <button id="btn-theme-toggle" class="btn btn-icon btn-outline-secondary" title="Ganti Tema Dark/Light">
             <span id="theme-icon"><i data-lucide="sun"></i></span>
           </button>
@@ -688,6 +693,55 @@
       <span>Inspeksi</span>
     </a>
   </nav>
+
+  <!-- Modal Supabase Settings & Database Integration -->
+  <div id="modal-supabase-config" class="modal-backdrop">
+    <div class="modal-dialog modal-dialog-lg">
+      <div class="modal-header">
+        <h3 class="modal-title"><i data-lucide="database"></i> Pengaturan Cloud Database Supabase</h3>
+        <button class="btn-modal-close">&times;</button>
+      </div>
+      <form id="form-supabase-config" onsubmit="window.saveSupabaseForm(event)">
+        <div class="modal-body">
+          <p class="text-muted margin-bottom-15">
+            Hubungkan proyek <strong>SIMPLE_MMS</strong> ke database cloud PostgreSQL di <strong>Supabase.com</strong>.
+            Jika tidak diisi, aplikasi akan beroperasi dalam mode offline (LocalStorage).
+          </p>
+
+          <div class="form-grid">
+            <div class="form-group-full">
+              <label class="form-label">Supabase Project URL *</label>
+              <input type="url" id="sb-form-url" class="form-control" placeholder="https://xyzxyz.supabase.co" required>
+            </div>
+            <div class="form-group-full">
+              <label class="form-label">Supabase Anon API Key *</label>
+              <input type="password" id="sb-form-key" class="form-control" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." required>
+            </div>
+          </div>
+
+          <div class="glass-card padding-20 margin-top-20">
+            <h4><i data-lucide="file-code"></i> Perintah Perintah Perdana (Database SQL Schema)</h4>
+            <p class="text-muted font-small margin-top-10">
+              Sebelum menguji koneksi, pastikan Anda telah membuat tabel database di Supabase SQL Editor dengan menyalin script `schema.sql`.
+            </p>
+            <div class="btn-group margin-top-15">
+              <button type="button" class="btn btn-sm btn-outline-primary" onclick="window.copySQLSchema()">
+                <i data-lucide="copy"></i> Salin Script SQL Schema (`schema.sql`)
+              </button>
+              <button type="button" class="btn btn-sm btn-outline-success" onclick="window.syncDataToSupabaseNow()">
+                <i data-lucide="cloud-upload"></i> 1-Klik Upload Seluruh Data ke Supabase
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-danger" onclick="window.disconnectSupabase()">Putuskan Koneksi</button>
+          <button type="button" class="btn btn-secondary btn-modal-close">Batal</button>
+          <button type="submit" class="btn btn-primary"><i data-lucide="check"></i> Simpan & Tes Koneksi</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
   <!-- Entry Script -->
   <script type="module" src="js/app.js"></script>

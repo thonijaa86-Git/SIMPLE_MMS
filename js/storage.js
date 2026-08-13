@@ -1,6 +1,9 @@
 /**
- * LocalStorage Data Manager & Pre-seeded Sample Data for MMS
+ * Storage Manager & Supabase Integration Module for MMS
  */
+
+import { getSupabaseConfig } from './config.js';
+import { showToast } from './utils/helpers.js';
 
 const STORAGE_KEYS = {
   ASSETS: 'mms_assets_data',
@@ -8,11 +11,31 @@ const STORAGE_KEYS = {
   PM_SCHEDULES: 'mms_pm_schedules_data',
   INSPECTIONS: 'mms_inspections_data',
   INVENTORY: 'mms_inventory_data',
-  TECHNICIANS: 'mms_technicians_data',
-  SETTINGS: 'mms_settings_data'
+  TECHNICIANS: 'mms_technicians_data'
 };
 
-// Seed Data
+let supabaseClient = null;
+
+export function getSupabaseClient() {
+  if (supabaseClient) return supabaseClient;
+  const cfg = getSupabaseConfig();
+  if (cfg.url && cfg.key && window.supabase) {
+    try {
+      supabaseClient = window.supabase.createClient(cfg.url, cfg.key);
+      return supabaseClient;
+    } catch (err) {
+      console.error('Error creating Supabase client:', err);
+    }
+  }
+  return null;
+}
+
+export function resetSupabaseClient() {
+  supabaseClient = null;
+  return getSupabaseClient();
+}
+
+// Seed Data Defaults
 const DEFAULT_ASSETS = [
   {
     id: 'AST-001',
@@ -442,11 +465,194 @@ export class StorageManager {
   static getTechnicians() { return this.get(STORAGE_KEYS.TECHNICIANS) || []; }
 
   // Setters
-  static saveAssets(assets) { this.set(STORAGE_KEYS.ASSETS, assets); }
-  static saveWorkOrders(wos) { this.set(STORAGE_KEYS.WORK_ORDERS, wos); }
-  static savePMSchedules(pms) { this.set(STORAGE_KEYS.PM_SCHEDULES, pms); }
-  static saveInspections(insps) { this.set(STORAGE_KEYS.INSPECTIONS, insps); }
-  static saveInventory(inv) { this.set(STORAGE_KEYS.INVENTORY, inv); }
+  static saveAssets(assets) {
+    this.set(STORAGE_KEYS.ASSETS, assets);
+    this.syncAssetsToSupabase(assets);
+  }
+
+  static saveWorkOrders(wos) {
+    this.set(STORAGE_KEYS.WORK_ORDERS, wos);
+    this.syncWorkOrdersToSupabase(wos);
+  }
+
+  static savePMSchedules(pms) {
+    this.set(STORAGE_KEYS.PM_SCHEDULES, pms);
+    this.syncPMSchedulesToSupabase(pms);
+  }
+
+  static saveInspections(insps) {
+    this.set(STORAGE_KEYS.INSPECTIONS, insps);
+    this.syncInspectionsToSupabase(insps);
+  }
+
+  static saveInventory(inv) {
+    this.set(STORAGE_KEYS.INVENTORY, inv);
+    this.syncInventoryToSupabase(inv);
+  }
+
+  // Sync helpers to Supabase Cloud
+  static async syncAssetsToSupabase(assets) {
+    const client = getSupabaseClient();
+    if (!client) return;
+
+    try {
+      const rows = assets.map(a => ({
+        id: a.id,
+        name: a.name,
+        category: a.category,
+        location: a.location,
+        status: a.status,
+        criticality: a.criticality,
+        serial_number: a.serialNumber,
+        manufacturer: a.manufacturer,
+        model: a.model,
+        purchase_date: a.purchaseDate || null,
+        purchase_cost: a.purchaseCost || 0,
+        last_maintenance: a.lastMaintenance || null,
+        next_pm_date: a.nextPMDate || null,
+        specifications: a.specifications,
+        image: a.image
+      }));
+
+      const { error } = await client.from('assets').upsert(rows);
+      if (error) console.error('Supabase assets upsert error:', error);
+    } catch (e) {
+      console.error('Supabase assets sync exception:', e);
+    }
+  }
+
+  static async syncWorkOrdersToSupabase(wos) {
+    const client = getSupabaseClient();
+    if (!client) return;
+
+    try {
+      const rows = wos.map(w => ({
+        id: w.id,
+        title: w.title,
+        asset_id: w.assetId,
+        asset_name: w.assetName,
+        type: w.type,
+        priority: w.priority,
+        status: w.status,
+        assigned_tech: w.assignedTech,
+        created_date: w.createdDate,
+        target_date: w.targetDate || null,
+        completed_date: w.completedDate || null,
+        problem_description: w.problemDescription,
+        resolution_notes: w.resolutionNotes,
+        estimated_hours: w.estimatedHours || 0,
+        actual_hours: w.actualHours || 0,
+        parts_used: w.partsUsed || [],
+        total_cost: w.totalCost || 0
+      }));
+
+      const { error } = await client.from('work_orders').upsert(rows);
+      if (error) console.error('Supabase work_orders upsert error:', error);
+    } catch (e) {
+      console.error('Supabase work_orders sync exception:', e);
+    }
+  }
+
+  static async syncPMSchedulesToSupabase(pms) {
+    const client = getSupabaseClient();
+    if (!client) return;
+
+    try {
+      const rows = pms.map(p => ({
+        id: p.id,
+        title: p.title,
+        asset_id: p.assetId,
+        asset_name: p.assetName,
+        frequency: p.frequency,
+        interval_days: p.intervalDays || 30,
+        last_completed: p.lastCompleted || null,
+        next_due_date: p.nextDueDate || null,
+        status: p.status,
+        assigned_tech: p.assignedTech,
+        checklist: p.checklist || []
+      }));
+
+      const { error } = await client.from('pm_schedules').upsert(rows);
+      if (error) console.error('Supabase pm_schedules upsert error:', error);
+    } catch (e) {
+      console.error('Supabase pm_schedules sync exception:', e);
+    }
+  }
+
+  static async syncInspectionsToSupabase(insps) {
+    const client = getSupabaseClient();
+    if (!client) return;
+
+    try {
+      const rows = insps.map(i => ({
+        id: i.id,
+        title: i.title,
+        asset_id: i.assetId,
+        asset_name: i.assetName,
+        inspector: i.inspector,
+        date: i.date,
+        overall_result: i.overallResult,
+        checklist_items: i.checklistItems || [],
+        meter_reading: i.meterReading
+      }));
+
+      const { error } = await client.from('inspections').upsert(rows);
+      if (error) console.error('Supabase inspections upsert error:', error);
+    } catch (e) {
+      console.error('Supabase inspections sync exception:', e);
+    }
+  }
+
+  static async syncInventoryToSupabase(inv) {
+    const client = getSupabaseClient();
+    if (!client) return;
+
+    try {
+      const rows = inv.map(i => ({
+        id: i.id,
+        code: i.code,
+        name: i.name,
+        category: i.category,
+        stock: i.stock || 0,
+        min_stock: i.minStock || 5,
+        unit: i.unit,
+        unit_price: i.unitPrice || 0,
+        location: i.location,
+        supplier: i.supplier
+      }));
+
+      const { error } = await client.from('inventory').upsert(rows);
+      if (error) console.error('Supabase inventory upsert error:', error);
+    } catch (e) {
+      console.error('Supabase inventory sync exception:', e);
+    }
+  }
+
+  // 1-Click Sync All Local Data to Supabase
+  static async syncAllLocalToSupabase() {
+    const client = getSupabaseClient();
+    if (!client) {
+      showToast('Koneksi Supabase belum diatur. Masukkan URL & Anon Key di menu pengaturan.', 'warning');
+      return false;
+    }
+
+    try {
+      showToast('Memulai sinkronisasi data ke Supabase Cloud...', 'info');
+
+      await this.syncAssetsToSupabase(this.getAssets());
+      await this.syncWorkOrdersToSupabase(this.getWorkOrders());
+      await this.syncPMSchedulesToSupabase(this.getPMSchedules());
+      await this.syncInspectionsToSupabase(this.getInspections());
+      await this.syncInventoryToSupabase(this.getInventory());
+
+      showToast('Sinkronisasi ke Supabase Cloud BERHASIL!', 'success');
+      return true;
+    } catch (err) {
+      console.error('Failed to sync data to Supabase:', err);
+      showToast(`Gagal sinkronisasi: ${err.message}`, 'error');
+      return false;
+    }
+  }
 
   // Reset to default
   static resetToDefault() {
