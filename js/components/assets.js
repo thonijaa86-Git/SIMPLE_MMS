@@ -34,7 +34,7 @@ export function renderAssets() {
 
   if (filtered.length === 0) {
     container.innerHTML = `
-      <div class="empty-state">
+      <div class="empty-state glass-card">
         <i data-lucide="box-select"></i>
         <h3>Tidak ada aset yang ditemukan</h3>
         <p>Coba ubah kata kunci pencarian atau filter yang diterapkan.</p>
@@ -61,52 +61,68 @@ export function renderAssets() {
   };
 
   container.innerHTML = `
-    <div class="assets-grid">
-      ${filtered.map(asset => {
-        const activeWO = workOrders.filter(w => w.assetId === asset.id && w.status !== 'Selesai').length;
-        
-        return `
-          <div class="asset-card glass-card">
-            <div class="asset-card-image" style="background-image: url('${asset.image || 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=500&auto=format&fit=crop&q=60'}')">
-              <span class="badge ${statusBadgeClasses[asset.status] || 'badge-gray'} asset-status-badge">
-                ${asset.status}
-              </span>
-              <span class="${criticalityClasses[asset.criticality] || ''} asset-criticality-badge">
-                Kritis: ${asset.criticality}
-              </span>
-            </div>
+    <div class="table-responsive glass-card">
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th>ID Aset</th>
+            <th>Nama Aset & Spesifikasi</th>
+            <th>Kategori</th>
+            <th>Lokasi</th>
+            <th>Status Aset</th>
+            <th>Kritikalitas</th>
+            <th>Next PM</th>
+            <th>WO Aktif</th>
+            <th style="text-align: right;">Aksi</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${filtered.map(asset => {
+            const activeWO = workOrders.filter(w => w.assetId === asset.id && w.status !== 'Selesai').length;
             
-            <div class="asset-card-body">
-              <div class="asset-id-tag">${asset.id}</div>
-              <h3 class="asset-title" title="${asset.name}">${asset.name}</h3>
-              
-              <div class="asset-meta">
-                <div><i data-lucide="folder"></i> ${asset.category}</div>
-                <div><i data-lucide="map-pin"></i> ${asset.location}</div>
-                <div><i data-lucide="calendar"></i> Next PM: <strong>${formatDate(asset.nextPMDate)}</strong></div>
-              </div>
-
-              ${activeWO > 0 ? `
-                <div class="asset-wo-alert">
-                  <i data-lucide="wrench"></i> ${activeWO} Work Order Aktif
-                </div>
-              ` : ''}
-
-              <div class="asset-card-actions">
-                <button class="btn btn-sm btn-outline-primary" onclick="window.viewAssetDetail('${asset.id}')">
-                  <i data-lucide="eye"></i> Detail
-                </button>
-                <button class="btn btn-sm btn-outline-secondary" onclick="window.openAssetModal('${asset.id}')">
-                  <i data-lucide="edit"></i> Edit
-                </button>
-                <button class="btn btn-sm btn-outline-danger" onclick="window.deleteAsset('${asset.id}')">
-                  <i data-lucide="trash-2"></i>
-                </button>
-              </div>
-            </div>
-          </div>
-        `;
-      }).join('')}
+            return `
+              <tr>
+                <td><strong style="color: var(--primary-color);">${asset.id}</strong></td>
+                <td>
+                  <div style="font-weight: 600;">${asset.name}</div>
+                  <small style="color: var(--text-muted);">${asset.manufacturer || 'S/N: ' + (asset.serialNumber || '-')}</small>
+                </td>
+                <td><span class="badge badge-gray">${asset.category}</span></td>
+                <td><small><i data-lucide="map-pin"></i> ${asset.location}</small></td>
+                <td>
+                  <span class="badge ${statusBadgeClasses[asset.status] || 'badge-gray'}">
+                    ${asset.status}
+                  </span>
+                </td>
+                <td>
+                  <span class="${criticalityClasses[asset.criticality] || ''}">
+                    ${asset.criticality}
+                  </span>
+                </td>
+                <td><small>${formatDate(asset.nextPMDate)}</small></td>
+                <td>
+                  ${activeWO > 0 ? `
+                    <span class="badge badge-warning"><i data-lucide="wrench"></i> ${activeWO} WO</span>
+                  ` : '<span style="color: var(--text-muted);">-</span>'}
+                </td>
+                <td style="text-align: right;">
+                  <div class="btn-group" style="justify-content: flex-end;">
+                    <button class="btn btn-sm btn-outline-primary" title="Lihat Detail" onclick="window.viewAssetDetail('${asset.id}')">
+                      <i data-lucide="eye"></i> Detail
+                    </button>
+                    <button class="btn btn-sm btn-outline-secondary" title="Edit Aset" onclick="window.openAssetModal('${asset.id}')">
+                      <i data-lucide="edit"></i> Edit
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger" title="Hapus Aset" onclick="window.deleteAsset('${asset.id}')">
+                      <i data-lucide="trash-2"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            `;
+          }).join('')}
+        </tbody>
+      </table>
     </div>
   `;
 
