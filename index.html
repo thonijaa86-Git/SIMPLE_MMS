@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Maintenance Management System (MMS)</title>
+  <meta name="description" content="Sistem Pengelolaan Pemeliharaan Aset, Work Order, Preventive Maintenance, Inspeksi, dan Suku Cadang">
+
+  <!-- Lucide Icons & Chart.js -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Master CSS -->
+  <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+
+  <div class="app-container">
+
+    <!-- Mobile Overlay Backdrop -->
+    <div id="sidebar-backdrop" class="sidebar-backdrop"></div>
+
+    <!-- Sidebar Navigation -->
+    <aside id="app-sidebar" class="sidebar">
+      <div class="sidebar-header">
+        <div class="brand-logo">
+          <i data-lucide="wrench"></i>
+        </div>
+        <div class="brand-text">
+          <h2>SIMPLE MMS</h2>
+          <span>Maintenance Suite</span>
+        </div>
+        <button id="btn-sidebar-close" class="btn btn-icon btn-outline-secondary mobile-only-inline" title="Tutup Menu">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a href="#" class="nav-item active" data-view="dashboard">
+          <i data-lucide="layout-dashboard"></i>
+          <span>Dashboard & Analitik</span>
+        </a>
+        <a href="#" class="nav-item" data-view="assets">
+          <i data-lucide="box"></i>
+          <span>Pengelolaan Aset</span>
+        </a>
+        <a href="#" class="nav-item" data-view="workorders">
+          <i data-lucide="file-text"></i>
+          <span>Work Order (SPK)</span>
+        </a>
+        <a href="#" class="nav-item" data-view="pm">
+          <i data-lucide="calendar"></i>
+          <span>Preventive PM</span>
+        </a>
+        <a href="#" class="nav-item" data-view="inspections">
+          <i data-lucide="clipboard-check"></i>
+          <span>Inspeksi & Checklist</span>
+        </a>
+        <a href="#" class="nav-item" data-view="inventory">
+          <i data-lucide="package-search"></i>
+          <span>Suku Cadang (Parts)</span>
+        </a>
+        <a href="#" class="nav-item" data-view="reports">
+          <i data-lucide="bar-chart-3"></i>
+          <span>Laporan & Ekspor</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div>
+          <strong>MMS v2.4</strong><br>
+          <small>Status: Enterprise Active</small>
+        </div>
+        <button id="btn-sidebar-toggle" class="btn btn-icon btn-outline-secondary desktop-only-inline" title="Collapse Sidebar">
+          <i data-lucide="panel-left-close"></i>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content Wrapper -->
+    <div class="main-wrapper">
+      
+      <!-- Topbar Header -->
+      <header class="topbar">
+        <div class="topbar-left">
+          <button id="btn-mobile-menu" class="btn btn-icon btn-outline-secondary mobile-menu-btn" title="Buka Menu">
+            <i data-lucide="menu"></i>
+          </button>
+          <h1 id="page-header-title" class="page-header-title">Dashboard Utama & Analitik</h1>
+        </div>
+
+        <div class="topbar-right">
+          <button id="btn-theme-toggle" class="btn btn-icon btn-outline-secondary" title="Ganti Tema Dark/Light">
+            <span id="theme-icon"><i data-lucide="sun"></i></span>
+          </button>
+          
+          <button class="btn btn-primary" onclick="window.openWorkOrderModal()">
+            <i data-lucide="plus-circle"></i> <span class="btn-text-responsive">SPK Baru</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Content Views Container -->
+      <main class="content-body">
+
+        <!-- 1. DASHBOARD VIEW -->
+        <section id="view-dashboard" class="view-container active">
+          <!-- Urgent Alert Banner -->
+          <div id="dashboard-alerts-banner" style="display: none;"></div>
+
+          <!-- KPI Cards Grid -->
+          <div id="dashboard-kpi-grid" class="kpi-grid"></div>
+
+          <!-- Charts & Analytics Grid -->
+          <div class="dashboard-grid">
+            <div class="glass-card">
+              <h3><i data-lucide="trending-up"></i> Tren Biaya Pemeliharaan (Maintenance Expense)</h3>
+              <div class="chart-box margin-top-15">
+                <canvas id="chartMaintenanceCost"></canvas>
+              </div>
+            </div>
+
+            <div class="glass-card">
+              <h3><i data-lucide="pie-chart"></i> Distribusi Status WO</h3>
+              <div class="chart-box margin-top-15">
+                <canvas id="chartWOStatus"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- Asset Health & Recent WOs -->
+          <div class="dashboard-grid margin-top-25">
+            <div class="glass-card">
+              <div class="filter-bar margin-bottom-15" style="margin-bottom:0;">
+                <h3><i data-lucide="clock"></i> Work Order Terbaru</h3>
+                <button class="btn btn-sm btn-outline-primary" onclick="window.navigateTo('workorders')">Lihat Semua</button>
+              </div>
+              <div class="table-responsive margin-top-15">
+                <table class="table table-hover">
+                  <thead>
+                    <tr>
+                      <th>No. WO</th>
+                      <th>Judul SPK</th>
+                      <th>Prioritas</th>
+                      <th>Status</th>
+                      <th>Teknisi</th>
+                      <th>Tanggal</th>
+                    </tr>
+                  </thead>
+                  <tbody id="dashboard-recent-wo-table"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="glass-card">
+              <h3><i data-lucide="activity"></i> Kondisi Kesehatan Aset</h3>
+              <div class="chart-box margin-top-15">
+                <canvas id="chartAssetCondition"></canvas>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 2. ASSET MANAGEMENT VIEW -->
+        <section id="view-assets" class="view-container">
+          <div class="filter-bar">
+            <div class="search-input-group">
+              <i data-lucide="search"></i>
+              <input type="text" id="asset-search" class="form-control" placeholder="Cari nama aset, ID, lokasi, atau serial number...">
+            </div>
+
+            <div class="btn-group">
+              <select id="asset-filter-category" class="form-control">
+                <option value="ALL">Semua Kategori</option>
+              </select>
+              <select id="asset-filter-status" class="form-control">
+                <option value="ALL">Semua Status</option>
+                <option value="Operasional">Operasional</option>
+                <option value="Maintenance">Maintenance</option>
+                <option value="Standby">Standby</option>
+                <option value="Breakdown">Breakdown</option>
+              </select>
+              <button class="btn btn-primary" onclick="window.openAssetModal()">
+                <i data-lucide="plus"></i> Tambah Aset
+              </button>
+            </div>
+          </div>
+
+          <div id="assets-list-container"></div>
+        </section>
+
+        <!-- 3. WORK ORDER VIEW -->
+        <section id="view-workorders" class="view-container">
+          <div class="filter-bar">
+            <div class="search-input-group">
+              <i data-lucide="search"></i>
+              <input type="text" id="wo-search" class="form-control" placeholder="Cari nomor WO, judul, aset, atau teknisi...">
+            </div>
+
+            <div class="btn-group">
+              <select id="wo-filter-status" class="form-control">
+                <option value="ALL">Semua Status</option>
+                <option value="Disetujui">Disetujui</option>
+                <option value="Dalam Proses">Dalam Proses</option>
+                <option value="Menunggu Part">Menunggu Part</option>
+                <option value="Selesai">Selesai</option>
+                <option value="Dibatalkan">Dibatalkan</option>
+              </select>
+              <select id="wo-filter-priority" class="form-control">
+                <option value="ALL">Semua Prioritas</option>
+                <option value="Darurat">Darurat</option>
+                <option value="Tinggi">Tinggi</option>
+                <option value="Sedang">Sedang</option>
+                <option value="Rendah">Rendah</option>
+              </select>
+              <button id="btn-toggle-wo-view" class="btn btn-outline-secondary">
+                <i data-lucide="layout-grid"></i> Kanban View
+              </button>
+              <button class="btn btn-primary" onclick="window.openWorkOrderModal()">
+                <i data-lucide="plus"></i> Buat SPK Baru
+              </button>
+            </div>
+          </div>
+
+          <div id="workorders-list-container"></div>
+        </section>
+
+        <!-- 4. PREVENTIVE MAINTENANCE VIEW -->
+        <section id="view-pm" class="view-container">
+          <div class="filter-bar">
+            <h3><i data-lucide="calendar"></i> Pemeliharaan Rutin & Jadwal PM</h3>
+            <button class="btn btn-primary" onclick="window.openPMModal()">
+              <i data-lucide="plus"></i> Buat Jadwal PM Baru
+            </button>
+          </div>
+          <div id="pm-list-container"></div>
+        </section>
+
+        <!-- 5. INSPECTION VIEW -->
+        <section id="view-inspections" class="view-container">
+          <div class="filter-bar">
+            <h3><i data-lucide="clipboard-check"></i> Riwayat & Checklist Inspeksi</h3>
+            <button class="btn btn-primary" onclick="window.openInspectionModal()">
+              <i data-lucide="plus"></i> Eksekusi Inspeksi Baru
+            </button>
+          </div>
+          <div id="inspections-list-container"></div>
+        </section>
+
+        <!-- 6. INVENTORY VIEW -->
+        <section id="view-inventory" class="view-container">
+          <div class="filter-bar">
+            <div class="search-input-group">
+              <i data-lucide="search"></i>
+              <input type="text" id="inventory-search" class="form-control" placeholder="Cari kode part, nama suku cadang, supplier...">
+            </div>
+            <button class="btn btn-primary" onclick="window.openInventoryModal()">
+              <i data-lucide="plus"></i> Tambah Part Baru
+            </button>
+          </div>
+          <div id="inventory-list-container"></div>
+        </section>
+
+        <!-- 7. REPORTS VIEW -->
+        <section id="view-reports" class="view-container">
+          <div id="reports-content-container"></div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- MODALS CONTAINER -->
+
+  <!-- Modal Asset Form -->
+  <div id="modal-asset-form" class="modal-backdrop">
+    <div class="modal-dialog modal-dialog-lg">
+      <div class="modal-header">
+        <h3 id="modal-asset-title" class="modal-title">Tambah Aset Baru</h3>
+        <button class="btn-modal-close">&times;</button>
+      </div>
+      <form id="form-asset" onsubmit="window.saveAssetForm(event)">
+        <div class="modal-body">
+          <input type="hidden" id="asset-form-id" />
+          <div class="form-grid">
+            <div class="form-group-full">
+              <label class="form-label">Nama Aset / Peralatan *</label>
+              <input type="text" id="asset-form-name" class="form-control" required placeholder="Contoh: Mesin Milling CNC Haas VF-2">
+            </div>
+            <div>
+              <label class="form-label">Kategori *</label>
+              <select id="asset-form-category" class="form-control" required>
+                <option value="Mesin Produksi">Mesin Produksi</option>
+                <option value="HVAC">HVAC</option>
+                <option value="Kelistrikan">Kelistrikan</option>
+                <option value="Utilitas">Utilitas</option>
+                <option value="Fasilitas">Fasilitas</option>
+              </select>
+            </div>
+            <div>
+              <label class="form-label">Lokasi *</label>
+              <input type="text" id="asset-form-location" class="form-control" required placeholder="Contoh: Gedung A - Line 1">
+            </div>
+            <div>
+              <label class="form-label">Status Aset</label>
+              <select id="asset-form-status" class="form-control">
+                <option value="Operasional">Operasional</option>
+                <option value="Maintenance">Maintenance</option>
+                <option value="Standby">Standby</option>
+                <option value="Breakdown">Breakdown</option>
+              </select>
+            </div>
+            <div>
+              <label class="form-label">Tingkat Kritikalitas</label>
+              <select id="asset-form-criticality" class="form-control">
+                <option value="Tinggi">Tinggi (Critical)</option>
+                <option value="Sedang">Sedang (Medium)</option>
+                <option value="Rendah">Rendah (Low)</option>
+              </select>
+            </div>
+            <div>
+              <label class="form-label">Nomor Seri / S/N</label>
+              <input type="text" id="asset-form-serial" class="form-control" placeholder="Contoh: SN-882910">
+            </div>
+            <div>
+              <label class="form-label">Produsen / Merk</label>
+              <input type="text" id="asset-form-manufacturer" class="form-control" placeholder="Contoh: Caterpillar / Haas">
+            </div>
+            <div>
+              <label class="form-label">Harga Perolehan (IDR)</label>
+              <input type="number" id="asset-form-cost" class="form-control" placeholder="0">
+            </div>
+            <div>
+              <label class="form-label">Tanggal Pembelian</label>
+              <input type="date" id="asset-form-purchase-date" class="form-control">
+            </div>
+            <div class="form-group-full">
+              <label class="form-label">Spesifikasi Teknis</label>
+              <textarea id="asset-form-specs" class="form-control" rows="3" placeholder="Masukan rincian daya, tekanan, kapasitas..."></textarea>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary btn-modal-close">Batal</button>
+          <button type="submit" class="btn btn-primary">Simpan Aset</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal Asset Detail -->
+  <div id="modal-asset-detail" class="modal-backdrop">
+    <div class="modal-dialog modal-dialog-lg">
+      <div class="modal-header">
+        <h3 class="modal-title">Rincian Informasi Aset</h3>
+        <button class="btn-modal-close">&times;</button>
+      </div>
+      <div class="modal-body" id="asset-detail-content"></div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary btn-modal-close">Tutup</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Work Order Form -->
+  <div id="modal-wo-form" class="modal-backdrop">
+    <div class="modal-dialog modal-dialog-lg">
+      <div class="modal-header">
+        <h3 id="modal-wo-title" class="modal-title">Buat Surat Perintah Kerja (SPK)</h3>
+        <button class="btn-modal-close">&times;</button>
+      </div>
+      <form id="form-wo" onsubmit="window.saveWorkOrderForm(event)">
+        <div class="modal-body">
+          <input type="hidden" id="wo-form-id" />
+          <div class="form-grid">
+            <div class="form-group-full">
+              <label class="form-label">Judul Pekerjaan / SPK *</label>
+              <input type="text" id="wo-form-title" class="form-control" required placeholder="Contoh: Perbaikan Suhu Spindle CNC Overheating">
+            </div>
+            <div>
+              <label class="form-label">Aset Terkait *</label>
+              <select id="wo-form-asset" class="form-control" required>
+                <option value="">Pilih Aset...</option>
+              </select>
+            </div>
+            <div>
+              <label class="form-label">Kategori Maintenance</label>
+              <select id="wo-form-type" class="form-control">
+                <option value="Corrective">Corrective Maintenance (Perbaikan)</option>
+                <option value="Preventive">Preventive Maintenance (Pencegahan)</option>
+                <option value="Breakdown">Breakdown Emergency</option>
+                <option value="Inspection">Inspeksi & Kalibrasi</option>
+              </select>
+            </div>
+            <div>
+              <label class="form-label">Prioritas Kerja</label>
+              <select id="wo-form-priority" class="form-control">
+                <option value="Darurat">Darurat (Emergency)</option>
+                <option value="Tinggi">Tinggi (High)</option>
+                <option value="Sedang" selected>Sedang (Medium)</option>
+                <option value="Rendah">Rendah (Low)</option>
+              </select>
+            </div>
+            <div>
+              <label class="form-label">Status Work Order</label>
+              <select id="wo-form-status" class="form-control">
+                <option value="Disetujui">Disetujui (Approved)</option>
+                <option value="Dalam Proses">Dalam Proses (In Progress)</option>
+                <option value="Menunggu Part">Menunggu Part (On Hold)</option>
+                <option value="Draft">Draft</option>
+              </select>
+            </div>
+            <div>
+              <label class="form-label">Teknisi Penanggung Jawab</label>
+              <select id="wo-form-tech" class="form-control">
+                <option value="">Pilih Teknisi...</option>
+              </select>
+            </div>
+            <div>
+              <label class="form-label">Target Tanggal Selesai</label>
+              <input type="datetime-local" id="wo-form-target-date" class="form-control">
+            </div>
+            <div>
+              <label class="form-label">Estimasi Waktu Pengerjaan (Jam)</label>
+              <input type="number" id="wo-form-est-hours" class="form-control" value="4">
+            </div>
+            <div class="form-group-full">
+              <label class="form-label">Deskripsi Masalah & Instruksi</label>
+              <textarea id="wo-form-desc" class="form-control" rows="3" placeholder="Jelaskan gejala kerusakan atau instruksi kerja..."></textarea>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary btn-modal-close">Batal</button>
+          <button type="submit" class="btn btn-primary">Terbitkan SPK</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal Complete Work Order -->
+  <div id="modal-complete-wo" class="modal-backdrop">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title">Penyelesaian Work Order</h3>
+        <button class="btn-modal-close">&times;</button>
+      </div>
+      <form id="form-complete-wo" onsubmit="window.saveCompleteWO(event)">
+        <div class="modal-body">
+          <input type="hidden" id="complete-wo-id" />
+          <p id="complete-wo-title-display" class="font-medium margin-bottom-15"></p>
+          <div class="form-grid">
+            <div>
+              <label class="form-label">Total Realisasi Waktu (Jam)</label>
+              <input type="number" id="complete-wo-hours" class="form-control" required value="2">
+            </div>
+            <div>
+              <label class="form-label">Total Biaya Perbaikan (IDR)</label>
+              <input type="number" id="complete-wo-cost" class="form-control" value="0">
+            </div>
+            <div class="form-group-full">
+              <label class="form-label">Laporan Solusi / Tindakan Perbaikan</label>
+              <textarea id="complete-wo-notes" class="form-control" rows="3" required placeholder="Masukan hasil perbaikan, penggantian suku cadang..."></textarea>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary btn-modal-close">Batal</button>
+          <button type="submit" class="btn btn-success"><i data-lucide="check"></i> Selesaikan WO</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal Printable Work Order Sheet (SPK) -->
+  <div id="modal-print-wo" class="modal-backdrop">
+    <div class="modal-dialog modal-dialog-lg">
+      <div class="modal-header">
+        <h3 class="modal-title">Preview Surat Perintah Kerja (SPK)</h3>
+        <button class="btn-modal-close">&times;</button>
+      </div>
+      <div class="modal-body" id="print-spk-content"></div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary btn-modal-close">Tutup</button>
+        <button type="button" class="btn btn-primary" onclick="window.executePrint()">
+          <i data-lucide="printer"></i> Cetak / Simpan PDF
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal PM Form -->
+  <div id="modal-pm-form" class="modal-backdrop">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title">Tambah Jadwal PM Baru</h3>
+        <button class="btn-modal-close">&times;</button>
+      </div>
+      <form id="form-pm" onsubmit="window.savePMForm(event)">
+        <div class="modal-body">
+          <div class="form-grid">
+            <div class="form-group-full">
+              <label class="form-label">Judul Pemeliharaan Rutin *</label>
+              <input type="text" id="pm-form-title" class="form-control" required placeholder="Contoh: Servis Bulanan & Lubrikasi Bearing">
+            </div>
+            <div>
+              <label class="form-label">Aset Terkait *</label>
+              <select id="pm-form-asset" class="form-control" required>
+                <option value="">Pilih Aset...</option>
+              </select>
+            </div>
+            <div>
+              <label class="form-label">Frekuensi Pemeliharaan</label>
+              <select id="pm-form-frequency" class="form-control">
+                <option value="Harian">Harian</option>
+                <option value="Mingguan">Mingguan</option>
+                <option value="Bulanan" selected>Bulanan</option>
+                <option value="3 Bulanan">3 Bulanan</option>
+              </select>
+            </div>
+            <div>
+              <label class="form-label">Tanggal Jatuh Tempo Berikutnya *</label>
+              <input type="date" id="pm-form-next-date" class="form-control" required>
+            </div>
+            <div>
+              <label class="form-label">Teknisi Penanggung Jawab</label>
+              <input type="text" id="pm-form-tech" class="form-control" placeholder="Contoh: Budi Santoso">
+            </div>
+            <div class="form-group-full">
+              <label class="form-label">Poin Checklist PM (Satu per baris)</label>
+              <textarea id="pm-form-checklist" class="form-control" rows="4" placeholder="Cek level oli&#10;Greasing bearing&#10;Pembersihan strainer"></textarea>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary btn-modal-close">Batal</button>
+          <button type="submit" class="btn btn-primary">Simpan Jadwal</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal Inspection Form -->
+  <div id="modal-insp-form" class="modal-backdrop">
+    <div class="modal-dialog modal-dialog-lg">
+      <div class="modal-header">
+        <h3 class="modal-title">Form Eksekusi Inspeksi & Checklist</h3>
+        <button class="btn-modal-close">&times;</button>
+      </div>
+      <form id="form-insp" onsubmit="window.saveInspectionForm(event)">
+        <div class="modal-body">
+          <div class="form-grid">
+            <div class="form-group-full">
+              <label class="form-label">Judul Inspeksi *</label>
+              <input type="text" id="insp-form-title" class="form-control" required placeholder="Contoh: Inspeksi Kerapihan & Safety Harian Genset">
+            </div>
+            <div>
+              <label class="form-label">Aset Terkait *</label>
+              <select id="insp-form-asset" class="form-control" required>
+                <option value="">Pilih Aset...</option>
+              </select>
+            </div>
+            <div>
+              <label class="form-label">Nama Inspektur / Auditor *</label>
+              <input type="text" id="insp-form-inspector" class="form-control" required value="Ahmad Fauzi">
+            </div>
+            <div class="form-group-full">
+              <label class="form-label">Meter Reading / Hour Meter</label>
+              <input type="text" id="insp-form-meter" class="form-control" placeholder="Contoh: 1,450 Running Hours">
+            </div>
+          </div>
+
+          <div class="margin-top-20">
+            <div class="filter-bar" style="margin-bottom: 10px;">
+              <label class="form-label margin-bottom-0">Item Checklist Inspeksi:</label>
+              <button type="button" class="btn btn-sm btn-outline-primary" onclick="window.addChecklistRow()">
+                <i data-lucide="plus"></i> Tambah Item
+              </button>
+            </div>
+            <div id="insp-checklist-rows"></div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary btn-modal-close">Batal</button>
+          <button type="submit" class="btn btn-primary">Simpan Hasil Inspeksi</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal Inspection Detail -->
+  <div id="modal-insp-detail" class="modal-backdrop">
+    <div class="modal-dialog modal-dialog-lg">
+      <div class="modal-header">
+        <h3 class="modal-title">Detail Hasil Inspeksi</h3>
+        <button class="btn-modal-close">&times;</button>
+      </div>
+      <div class="modal-body" id="insp-detail-body"></div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary btn-modal-close">Tutup</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Inventory Form -->
+  <div id="modal-inv-form" class="modal-backdrop">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 id="modal-inv-title" class="modal-title">Tambah Spare Part Baru</h3>
+        <button class="btn-modal-close">&times;</button>
+      </div>
+      <form id="form-inv" onsubmit="window.saveInventoryForm(event)">
+        <div class="modal-body">
+          <input type="hidden" id="inv-form-id" />
+          <div class="form-grid">
+            <div>
+              <label class="form-label">Kode Part *</label>
+              <input type="text" id="inv-form-code" class="form-control" required placeholder="Contoh: BRG-6205-2RS">
+            </div>
+            <div>
+              <label class="form-label">Nama Spare Part *</label>
+              <input type="text" id="inv-form-name" class="form-control" required placeholder="Contoh: Bearing SKF 6205">
+            </div>
+            <div>
+              <label class="form-label">Kategori</label>
+              <select id="inv-form-category" class="form-control">
+                <option value="Mekanikal">Mekanikal</option>
+                <option value="Kelistrikan">Kelistrikan</option>
+                <option value="Pelumas & Kimia">Pelumas & Kimia</option>
+                <option value="Filter">Filter</option>
+                <option value="Seal & Gasket">Seal & Gasket</option>
+              </select>
+            </div>
+            <div>
+              <label class="form-label">Satuan Unit *</label>
+              <input type="text" id="inv-form-unit" class="form-control" required placeholder="Pcs, Liter, Set, Roll">
+            </div>
+            <div>
+              <label class="form-label">Jumlah Stok Saat Ini</label>
+              <input type="number" id="inv-form-stock" class="form-control" value="10">
+            </div>
+            <div>
+              <label class="form-label">Batas Stok Minimum (Low Stock Alert)</label>
+              <input type="number" id="inv-form-minstock" class="form-control" value="5">
+            </div>
+            <div>
+              <label class="form-label">Harga Satuan (IDR)</label>
+              <input type="number" id="inv-form-price" class="form-control" value="50000">
+            </div>
+            <div>
+              <label class="form-label">Lokasi Rak Storage</label>
+              <input type="text" id="inv-form-location" class="form-control" placeholder="Contoh: Rak B-1">
+            </div>
+            <div class="form-group-full">
+              <label class="form-label">Supplier / Vendor</label>
+              <input type="text" id="inv-form-supplier" class="form-control" placeholder="Contoh: PT Shell Indonesia">
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary btn-modal-close">Batal</button>
+          <button type="submit" class="btn btn-primary">Simpan Spare Part</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Mobile Bottom Navigation Bar (Android & iOS) -->
+  <nav class="mobile-bottom-nav">
+    <a href="#" class="mobile-nav-item active" data-view="dashboard">
+      <i data-lucide="layout-dashboard"></i>
+      <span>Dashboard</span>
+    </a>
+    <a href="#" class="mobile-nav-item" data-view="assets">
+      <i data-lucide="box"></i>
+      <span>Aset</span>
+    </a>
+    <a href="#" class="mobile-nav-item" data-view="workorders">
+      <i data-lucide="file-text"></i>
+      <span>SPK / WO</span>
+    </a>
+    <a href="#" class="mobile-nav-item" data-view="pm">
+      <i data-lucide="calendar"></i>
+      <span>PM</span>
+    </a>
+    <a href="#" class="mobile-nav-item" data-view="inspections">
+      <i data-lucide="clipboard-check"></i>
+      <span>Inspeksi</span>
+    </a>
+  </nav>
+
+  <!-- Entry Script -->
+  <script type="module" src="js/app.js"></script>
+
+</body>
+</html>
