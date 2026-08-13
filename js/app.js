@@ -189,20 +189,40 @@ function updateThemeIcon(theme) {
   if (window.lucide) window.lucide.createIcons();
 }
 
+export function closeModal(modalEl = null) {
+  if (modalEl) {
+    modalEl.classList.remove('active');
+    return;
+  }
+  const activeModals = document.querySelectorAll('.modal-backdrop.active');
+  activeModals.forEach(m => m.classList.remove('active'));
+}
+
+window.closeModal = closeModal;
+
 function initModals() {
   // Close modals when clicking backdrop or close button
   document.addEventListener('click', (e) => {
-    if (e.target.classList.contains('modal-backdrop') || e.target.classList.contains('btn-modal-close')) {
-      const activeModal = document.querySelector('.modal.active');
-      if (activeModal) activeModal.classList.remove('active');
+    const closeBtn = e.target.closest('.btn-modal-close');
+    const isBackdrop = e.target.classList.contains('modal-backdrop');
+
+    if (closeBtn) {
+      e.preventDefault();
+      const parentModal = closeBtn.closest('.modal-backdrop');
+      if (parentModal) {
+        parentModal.classList.remove('active');
+      } else {
+        closeModal();
+      }
+    } else if (isBackdrop) {
+      e.target.classList.remove('active');
     }
   });
 
   // ESC key to close modal
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
-      const activeModal = document.querySelector('.modal.active');
-      if (activeModal) activeModal.classList.remove('active');
+      closeModal();
     }
   });
 }

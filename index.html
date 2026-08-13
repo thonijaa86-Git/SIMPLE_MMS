@@ -282,7 +282,7 @@
     <div class="modal-dialog modal-dialog-lg">
       <div class="modal-header">
         <h3 id="modal-asset-title" class="modal-title">Tambah Aset Baru</h3>
-        <button class="btn-modal-close">&times;</button>
+        <button type="button" class="btn-modal-close" onclick="window.closeModal()">&times;</button>
       </div>
       <form id="form-asset" onsubmit="window.saveAssetForm(event)">
         <div class="modal-body">
@@ -346,7 +346,7 @@
           </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary btn-modal-close">Batal</button>
+          <button type="button" class="btn btn-secondary btn-modal-close" onclick="window.closeModal()">Batal</button>
           <button type="submit" class="btn btn-primary">Simpan Aset</button>
         </div>
       </form>
@@ -358,11 +358,11 @@
     <div class="modal-dialog modal-dialog-lg">
       <div class="modal-header">
         <h3 class="modal-title">Rincian Informasi Aset</h3>
-        <button class="btn-modal-close">&times;</button>
+        <button type="button" class="btn-modal-close" onclick="window.closeModal()">&times;</button>
       </div>
       <div class="modal-body" id="asset-detail-content"></div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary btn-modal-close">Tutup</button>
+        <button type="button" class="btn btn-secondary btn-modal-close" onclick="window.closeModal()">Tutup</button>
       </div>
     </div>
   </div>
@@ -372,7 +372,7 @@
     <div class="modal-dialog modal-dialog-lg">
       <div class="modal-header">
         <h3 id="modal-wo-title" class="modal-title">Buat Surat Perintah Kerja (SPK)</h3>
-        <button class="btn-modal-close">&times;</button>
+        <button type="button" class="btn-modal-close" onclick="window.closeModal()">&times;</button>
       </div>
       <form id="form-wo" onsubmit="window.saveWorkOrderForm(event)">
         <div class="modal-body">
@@ -436,7 +436,7 @@
           </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary btn-modal-close">Batal</button>
+          <button type="button" class="btn btn-secondary btn-modal-close" onclick="window.closeModal()">Batal</button>
           <button type="submit" class="btn btn-primary">Terbitkan SPK</button>
         </div>
       </form>
@@ -448,7 +448,7 @@
     <div class="modal-dialog">
       <div class="modal-header">
         <h3 class="modal-title">Penyelesaian Work Order</h3>
-        <button class="btn-modal-close">&times;</button>
+        <button type="button" class="btn-modal-close" onclick="window.closeModal()">&times;</button>
       </div>
       <form id="form-complete-wo" onsubmit="window.saveCompleteWO(event)">
         <div class="modal-body">
@@ -470,7 +470,7 @@
           </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary btn-modal-close">Batal</button>
+          <button type="button" class="btn btn-secondary btn-modal-close" onclick="window.closeModal()">Batal</button>
           <button type="submit" class="btn btn-success"><i data-lucide="check"></i> Selesaikan WO</button>
         </div>
       </form>
@@ -482,11 +482,11 @@
     <div class="modal-dialog modal-dialog-lg">
       <div class="modal-header">
         <h3 class="modal-title">Preview Surat Perintah Kerja (SPK)</h3>
-        <button class="btn-modal-close">&times;</button>
+        <button type="button" class="btn-modal-close" onclick="window.closeModal()">&times;</button>
       </div>
       <div class="modal-body" id="print-spk-content"></div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary btn-modal-close">Tutup</button>
+        <button type="button" class="btn btn-secondary btn-modal-close" onclick="window.closeModal()">Tutup</button>
         <button type="button" class="btn btn-primary" onclick="window.executePrint()">
           <i data-lucide="printer"></i> Cetak / Simpan PDF
         </button>
@@ -499,7 +499,7 @@
     <div class="modal-dialog">
       <div class="modal-header">
         <h3 class="modal-title">Tambah Jadwal PM Baru</h3>
-        <button class="btn-modal-close">&times;</button>
+        <button type="button" class="btn-modal-close" onclick="window.closeModal()">&times;</button>
       </div>
       <form id="form-pm" onsubmit="window.savePMForm(event)">
         <div class="modal-body">
@@ -538,7 +538,7 @@
           </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary btn-modal-close">Batal</button>
+          <button type="button" class="btn btn-secondary btn-modal-close" onclick="window.closeModal()">Batal</button>
           <button type="submit" class="btn btn-primary">Simpan Jadwal</button>
         </div>
       </form>
@@ -550,7 +550,7 @@
     <div class="modal-dialog modal-dialog-lg">
       <div class="modal-header">
         <h3 class="modal-title">Form Eksekusi Inspeksi & Checklist</h3>
-        <button class="btn-modal-close">&times;</button>
+        <button type="button" class="btn-modal-close" onclick="window.closeModal()">&times;</button>
       </div>
       <form id="form-insp" onsubmit="window.saveInspectionForm(event)">
         <div class="modal-body">
@@ -586,7 +586,7 @@
           </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary btn-modal-close">Batal</button>
+          <button type="button" class="btn btn-secondary btn-modal-close" onclick="window.closeModal()">Batal</button>
           <button type="submit" class="btn btn-primary">Simpan Hasil Inspeksi</button>
         </div>
       </form>
@@ -598,11 +598,11 @@
     <div class="modal-dialog modal-dialog-lg">
       <div class="modal-header">
         <h3 class="modal-title">Detail Hasil Inspeksi</h3>
-        <button class="btn-modal-close">&times;</button>
+        <button type="button" class="btn-modal-close" onclick="window.closeModal()">&times;</button>
       </div>
       <div class="modal-body" id="insp-detail-body"></div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary btn-modal-close">Tutup</button>
+        <button type="button" class="btn btn-secondary btn-modal-close" onclick="window.closeModal()">Tutup</button>
       </div>
     </div>
   </div>
@@ -612,7 +612,7 @@
     <div class="modal-dialog">
       <div class="modal-header">
         <h3 id="modal-inv-title" class="modal-title">Tambah Spare Part Baru</h3>
-        <button class="btn-modal-close">&times;</button>
+        <button type="button" class="btn-modal-close" onclick="window.closeModal()">&times;</button>
       </div>
       <form id="form-inv" onsubmit="window.saveInventoryForm(event)">
         <div class="modal-body">
@@ -663,7 +663,7 @@
           </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary btn-modal-close">Batal</button>
+          <button type="button" class="btn btn-secondary btn-modal-close" onclick="window.closeModal()">Batal</button>
           <button type="submit" class="btn btn-primary">Simpan Spare Part</button>
         </div>
       </form>
@@ -699,7 +699,7 @@
     <div class="modal-dialog modal-dialog-lg">
       <div class="modal-header">
         <h3 class="modal-title"><i data-lucide="database"></i> Pengaturan Cloud Database Supabase</h3>
-        <button class="btn-modal-close">&times;</button>
+        <button type="button" class="btn-modal-close" onclick="window.closeModal()">&times;</button>
       </div>
       <form id="form-supabase-config" onsubmit="window.saveSupabaseForm(event)">
         <div class="modal-body">
@@ -736,7 +736,7 @@
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-outline-danger" onclick="window.disconnectSupabase()">Putuskan Koneksi</button>
-          <button type="button" class="btn btn-secondary btn-modal-close">Batal</button>
+          <button type="button" class="btn btn-secondary btn-modal-close" onclick="window.closeModal()">Batal</button>
           <button type="submit" class="btn btn-primary"><i data-lucide="check"></i> Simpan & Tes Koneksi</button>
         </div>
       </form>
