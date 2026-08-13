@@ -421,7 +421,7 @@ body {
 .btn-outline-secondary { border: 1px solid var(--border-color); color: var(--text-color); background: transparent; }
 .btn-outline-secondary:hover { background: rgba(255, 255, 255, 0.1); }
 
-.btn-outline-danger { border: 1px solid var(--danger-color); color: var(--danger-color); background: transparent; }
+.btn-outline-danger { border: 1.5px solid var(--danger-color); color: var(--danger-color); background: rgba(239, 68, 68, 0.05); }
 .btn-outline-danger:hover { background: var(--danger-color); color: #fff; }
 
 .btn-outline-success { border: 1px solid var(--success-color); color: var(--success-color); background: transparent; }
@@ -799,6 +799,17 @@ select.form-control option {
   gap: 12px;
   flex-shrink: 0;
   background: var(--bg-secondary);
+}
+
+.modal-footer .btn {
+  height: 42px;
+  padding: 0 20px;
+  font-size: 14px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
 }
 
 .form-grid {
