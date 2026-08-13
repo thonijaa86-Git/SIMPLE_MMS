@@ -192,7 +192,7 @@ function initCharts(workOrders, assets) {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-          legend: { position: 'bottom', labels: { color: 'var(--text-color)', font: { family: 'Open Sans' } } }
+          legend: { position: 'bottom', labels: { color: 'var(--text-color)', font: { family: 'Inter' } } }
         }
       }
     });
@@ -228,7 +228,7 @@ function initCharts(workOrders, assets) {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-          legend: { position: 'bottom', labels: { color: 'var(--text-color)', font: { family: 'Open Sans' } } }
+          legend: { position: 'bottom', labels: { color: 'var(--text-color)', font: { family: 'Inter' } } }
         }
       }
     });
@@ -272,7 +272,7 @@ function initCharts(workOrders, assets) {
           }
         },
         plugins: {
-          legend: { position: 'top', labels: { color: 'var(--text-color)', font: { family: 'Open Sans' } } }
+          legend: { position: 'top', labels: { color: 'var(--text-color)', font: { family: 'Inter' } } }
         }
       }
     });
