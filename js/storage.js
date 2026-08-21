@@ -1,5 +1,5 @@
 /**
- * Storage Manager & Supabase Integration Module for MMS
+ * Storage Manager & Direct Supabase REST API Integration Module for MMS
  */
 
 import { getSupabaseConfig } from './config.js';
@@ -37,473 +37,81 @@ export function resetSupabaseClient() {
   return getSupabaseClient();
 }
 
-// Seed Data Defaults
-const DEFAULT_ASSETS = [
-  {
-    id: 'AST-001',
-    name: 'Mesin CNC Milling Haas VF-2',
-    category: 'Mesin Produksi',
-    location: 'Gedung A - Line 1 Production',
-    status: 'Operasional',
-    criticality: 'Tinggi',
-    serialNumber: 'HS-2022-9981',
-    manufacturer: 'Haas Automation',
-    model: 'VF-2SS',
-    purchaseDate: '2022-03-15',
-    purchaseCost: 850000000,
-    yearMade: 2022,
-    installationYear: 2022,
-    lastMaintenance: '2026-07-20',
-    nextPMDate: '2026-08-20',
-    specifications: 'Spindle 12,000 RPM, 30+1 Tool Changer, Travel 762x406x508 mm',
-    image: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=500&auto=format&fit=crop&q=60'
-  },
-  {
-    id: 'AST-002',
-    name: 'Chiller Trane Centrifugal 500 TR',
-    category: 'HVAC',
-    location: 'Utility Building - Lt. 1',
-    status: 'Maintenance',
-    criticality: 'Tinggi',
-    serialNumber: 'TRN-500-883A',
-    manufacturer: 'Trane',
-    model: 'CVHE-500',
-    purchaseDate: '2020-06-10',
-    purchaseCost: 1200000000,
-    yearMade: 2020,
-    installationYear: 2020,
-    lastMaintenance: '2026-08-01',
-    nextPMDate: '2026-09-01',
-    specifications: 'Refrigerant R-1233zd, Chilled Water 7°C, 400V 3Ph 50Hz',
-    image: 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=500&auto=format&fit=crop&q=60'
-  },
-  {
-    id: 'AST-003',
-    name: 'Genset Caterpillar 1000 kVA',
-    category: 'Kelistrikan',
-    location: 'Power House Area Luar',
-    status: 'Standby',
-    criticality: 'Tinggi',
-    serialNumber: 'CAT-3508-771',
-    manufacturer: 'Caterpillar',
-    model: 'C32 ACERT',
-    purchaseDate: '2019-11-20',
-    purchaseCost: 950000000,
-    yearMade: 2019,
-    installationYear: 2019,
-    lastMaintenance: '2026-07-10',
-    nextPMDate: '2026-08-10',
-    specifications: 'Output 1000 kVA / 800 kW, Diesel Engine 1500 RPM, ATS Interlock',
-    image: 'https://images.unsplash.com/photo-1544725176-7c40e5a71c5e?w=500&auto=format&fit=crop&q=60'
-  },
-  {
-    id: 'AST-004',
-    name: 'Pompa Transfer Air Grundfos CR64',
-    category: 'Utilitas',
-    location: 'WTP (Water Treatment Plant)',
-    status: 'Operasional',
-    criticality: 'Sedang',
-    serialNumber: 'GRN-CR64-4412',
-    manufacturer: 'Grundfos',
-    model: 'CR64-3-2',
-    purchaseDate: '2021-08-05',
-    purchaseCost: 145000000,
-    yearMade: 2021,
-    installationYear: 2021,
-    lastMaintenance: '2026-06-15',
-    nextPMDate: '2026-09-15',
-    specifications: 'Kapasitas 64 m³/h, Head 60m, Power 18.5 kW Stainless Steel',
-    image: 'https://images.unsplash.com/photo-1581092335397-9583fe92d232?w=500&auto=format&fit=crop&q=60'
-  },
-  {
-    id: 'AST-005',
-    name: 'Kompresor Screw Atlas Copco GA37',
-    category: 'Utilitas',
-    location: 'Kompresor Room Gedung B',
-    status: 'Breakdown',
-    criticality: 'Tinggi',
-    serialNumber: 'AC-GA37-992',
-    manufacturer: 'Atlas Copco',
-    model: 'GA37 VSD+',
-    purchaseDate: '2023-01-12',
-    purchaseCost: 320000000,
-    yearMade: 2023,
-    installationYear: 2023,
-    lastMaintenance: '2026-05-10',
-    nextPMDate: '2026-08-12',
-    specifications: 'Pressure 8.5 Bar, Air Flow 6.8 m³/min, Inverter Drive 37 kW',
-    image: 'https://images.unsplash.com/photo-1581092162384-8987c1d64718?w=500&auto=format&fit=crop&q=60'
-  },
-  {
-    id: 'AST-006',
-    name: 'Forklift Electric Toyota 3 Ton',
-    category: 'Fasilitas',
-    location: 'Gudang Logistik Utama',
-    status: 'Operasional',
-    criticality: 'Sedang',
-    serialNumber: 'TOY-8FBN30-102',
-    manufacturer: 'Toyota Material Handling',
-    model: '8FBN30',
-    purchaseDate: '2022-09-01',
-    purchaseCost: 280000000,
-    yearMade: 2022,
-    installationYear: 2022,
-    lastMaintenance: '2026-07-28',
-    nextPMDate: '2026-08-28',
-    specifications: 'Baterai Li-ion 48V 600Ah, Mast Height 4.5m, Non-marking tires',
-    image: 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=500&auto=format&fit=crop&q=60'
-  }
-];
+// Native Direct REST API Fetch Helper for 100% Reliability
+async function fetchTableDirect(table) {
+  const cfg = getSupabaseConfig();
+  if (!cfg.url || !cfg.key) return null;
 
-const DEFAULT_WORK_ORDERS = [
-  {
-    id: 'WO-2026-0801',
-    title: 'Perbaikan Kebocoran Oli Spindle & Overheating',
-    assetId: 'AST-001',
-    assetName: 'Mesin CNC Milling Haas VF-2',
-    type: 'Corrective',
-    priority: 'Tinggi',
-    status: 'Dalam Proses',
-    assignedTech: 'Budi Santoso (Mekanik)',
-    createdDate: '2026-08-10T09:00:00',
-    targetDate: '2026-08-14T17:00:00',
-    completedDate: null,
-    problemDescription: 'Suhu spindle mencapai 78°C dan indikator alarm tekanan oli menyala.',
-    resolutionNotes: '',
-    estimatedHours: 6,
-    actualHours: 4,
-    partsUsed: [
-      { partId: 'PRT-001', partName: 'Oli Hydrolik Shell Tellus S2 V46', qty: 10, unitPrice: 85000 },
-      { partId: 'PRT-002', partName: 'O-Ring Seal Spindle Kit', qty: 1, unitPrice: 350000 }
-    ],
-    totalCost: 1200000
-  },
-  {
-    id: 'WO-2026-0802',
-    title: 'Ganti Filter Air & Descaling Condenser Chiller',
-    assetId: 'AST-002',
-    assetName: 'Chiller Trane Centrifugal 500 TR',
-    type: 'Preventive',
-    priority: 'Sedang',
-    status: 'Menunggu Part',
-    assignedTech: 'Rian Hidayat (HVAC Specialist)',
-    createdDate: '2026-08-08T10:30:00',
-    targetDate: '2026-08-15T16:00:00',
-    completedDate: null,
-    problemDescription: 'Jadwal PM bulanan descaling pipa condenser dan penggantian elemen filter air.',
-    resolutionNotes: '',
-    estimatedHours: 8,
-    actualHours: 0,
-    partsUsed: [],
-    totalCost: 2500000
-  },
-  {
-    id: 'WO-2026-0803',
-    title: 'Perbaikan Kompresor Mogok / V-Belt Putus',
-    assetId: 'AST-005',
-    assetName: 'Kompresor Screw Atlas Copco GA37',
-    type: 'Breakdown',
-    priority: 'Darurat',
-    status: 'Disetujui',
-    assignedTech: 'Ahmad Fauzi (Teknisi Senior)',
-    createdDate: '2026-08-12T14:15:00',
-    targetDate: '2026-08-13T18:00:00',
-    completedDate: null,
-    problemDescription: 'Kompresor tiba-tiba berhenti total. Bau terbakar dan V-belt penggerak terputus.',
-    resolutionNotes: '',
-    estimatedHours: 4,
-    actualHours: 0,
-    partsUsed: [
-      { partId: 'PRT-004', partName: 'V-Belt B-72 Industrial Heavy Duty', qty: 2, unitPrice: 175000 }
-    ],
-    totalCost: 850000
-  },
-  {
-    id: 'WO-2026-0705',
-    title: 'Inspeksi & Tes Overhaul Genset 1000 kVA',
-    assetId: 'AST-003',
-    assetName: 'Genset Caterpillar 1000 kVA',
-    type: 'Inspection',
-    priority: 'Sedang',
-    status: 'Selesai',
-    assignedTech: 'Eko Prasetyo (Listrik)',
-    createdDate: '2026-07-25T08:00:00',
-    targetDate: '2026-07-26T17:00:00',
-    completedDate: '2026-07-26T15:30:00',
-    problemDescription: 'Tes beban simulasi pemadaman dan pengecekan otomatis transfer switch (ATS).',
-    resolutionNotes: 'Pengujian sukses 100% load test 2 jam. Tegangan stabil pada 400V 50Hz. Oli dan radiator dalam kondisi prima.',
-    estimatedHours: 5,
-    actualHours: 5,
-    partsUsed: [
-      { partId: 'PRT-003', partName: 'Filter Oli Genset Cat 3508', qty: 2, unitPrice: 450000 }
-    ],
-    totalCost: 1650000
-  },
-  {
-    id: 'WO-2026-0708',
-    title: 'Kalibrasi Sensor Tekanan Pompa WTP',
-    assetId: 'AST-004',
-    assetName: 'Pompa Transfer Air Grundfos CR64',
-    type: 'Preventive',
-    priority: 'Rendah',
-    status: 'Selesai',
-    assignedTech: 'Budi Santoso (Mekanik)',
-    createdDate: '2026-07-20T11:00:00',
-    targetDate: '2026-07-21T15:00:00',
-    completedDate: '2026-07-21T14:00:00',
-    problemDescription: 'Pemeriksaan rutin transmitter pressure 0-10 Bar.',
-    resolutionNotes: 'Sensor dikalibrasi ulang dengan calibrator Fluke. Zero point disesuaikan kembali.',
-    estimatedHours: 2,
-    actualHours: 2,
-    partsUsed: [],
-    totalCost: 350000
-  }
-];
+  const endpoint = `${cfg.url}/rest/v1/${table}?select=*`;
+  const headers = {
+    'apikey': cfg.key,
+    'Authorization': `Bearer ${cfg.key}`,
+    'Accept': 'application/json'
+  };
 
-const DEFAULT_PM_SCHEDULES = [
-  {
-    id: 'PM-SCH-001',
-    title: 'Maintenance Rutin Bulanan CNC Haas',
-    assetId: 'AST-001',
-    assetName: 'Mesin CNC Milling Haas VF-2',
-    frequency: 'Bulanan',
-    intervalDays: 30,
-    lastCompleted: '2026-07-20',
-    nextDueDate: '2026-08-20',
-    status: 'Normal',
-    assignedTech: 'Budi Santoso (Mekanik)',
-    checklist: [
-      'Cek level oli lubricator & pneumatik',
-      'Pembersihan chip conveyor & tangki coolant',
-      'Inspeksi kekencangan belt spindle & motor servo',
-      'Uji coba zero point return & tool changer alignment'
-    ]
-  },
-  {
-    id: 'PM-SCH-002',
-    title: 'Inspeksi & Descaling Condenser Chiller',
-    assetId: 'AST-002',
-    assetName: 'Chiller Trane Centrifugal 500 TR',
-    frequency: 'Bulanan',
-    intervalDays: 30,
-    lastCompleted: '2026-07-01',
-    nextDueDate: '2026-08-01',
-    status: 'Overdue',
-    assignedTech: 'Rian Hidayat (HVAC Specialist)',
-    checklist: [
-      'Pemeriksaan tekanan refrigerant suction & discharge',
-      'Uji kualitas air pendingin cooling tower',
-      'Pembersihan strainer & filter air condenser',
-      'Cek kebocoran oli kompresor'
-    ]
-  },
-  {
-    id: 'PM-SCH-003',
-    title: 'Warm-up & Test Running Genset Cat',
-    assetId: 'AST-003',
-    assetName: 'Genset Caterpillar 1000 kVA',
-    frequency: 'Mingguan',
-    intervalDays: 7,
-    lastCompleted: '2026-08-07',
-    nextDueDate: '2026-08-14',
-    status: 'Jatuh Tempo',
-    assignedTech: 'Eko Prasetyo (Listrik)',
-    checklist: [
-      'Pemeriksaan tegangan baterai starter 24V',
-      'Cek volume bahan bakar solar pada tanki harian',
-      'Running tanpa beban (No Load) 15 menit',
-      'Pengecekan indikator suhu & tekanan oli mesin'
-    ]
-  },
-  {
-    id: 'PM-SCH-004',
-    title: 'Greasing Bearing & Check Mechanical Seal Pompa',
-    assetId: 'AST-004',
-    assetName: 'Pompa Transfer Air Grundfos CR64',
-    frequency: '3 Bulanan',
-    intervalDays: 90,
-    lastCompleted: '2026-06-15',
-    nextDueDate: '2026-09-15',
-    status: 'Normal',
-    assignedTech: 'Budi Santoso (Mekanik)',
-    checklist: [
-      'Pemberian grease sintetis pada bearing motor',
-      'Pengecekan kebocoran pada mechanical seal',
-      'Pengukuran getaran (vibration check) housing pompa'
-    ]
+  try {
+    const res = await fetch(endpoint, { headers });
+    if (!res.ok) {
+      console.error(`Supabase REST fetch error on ${table}:`, res.statusText);
+      return null;
+    }
+    return await res.json();
+  } catch (err) {
+    console.error(`Supabase REST fetch exception on ${table}:`, err);
+    return null;
   }
-];
+}
 
-const DEFAULT_INSPECTIONS = [
-  {
-    id: 'INSP-2026-001',
-    title: 'Inspeksi Keselamatan & Kelayakan Forklift',
-    assetId: 'AST-006',
-    assetName: 'Forklift Electric Toyota 3 Ton',
-    inspector: 'Ahmad Fauzi',
-    date: '2026-08-11T09:30:00',
-    overallResult: 'Lulus',
-    checklistItems: [
-      { item: 'Sistem Pengereman (Foot & Parking Brake)', status: 'Pass', notes: 'Pakem dan responsif' },
-      { item: 'Kondisi Garpu (Fork) & Chain Lift', status: 'Pass', notes: 'Tidak ada retak' },
-      { item: 'Klakson, Lampu Hazard, & Sirine Mundur', status: 'Pass', notes: 'Berfungsi baik' },
-      { item: 'Kapasitas Baterai & Kabel Charger', status: 'Warning', notes: 'Kabel soket sedikit longgar' }
-    ],
-    meterReading: '2,450 Jam'
-  },
-  {
-    id: 'INSP-2026-002',
-    title: 'Inspeksi Tekanan & Beban Kompresor Screw',
-    assetId: 'AST-005',
-    assetName: 'Kompresor Screw Atlas Copco GA37',
-    inspector: 'Budi Santoso',
-    date: '2026-08-12T13:45:00',
-    overallResult: 'Gagal',
-    checklistItems: [
-      { item: 'Tekanan Udara Keluar (Outlet Bar)', status: 'Fail', notes: 'Drop di bawah 4 bar' },
-      { item: 'Suhu Temperatur Air End', status: 'Fail', notes: 'Overheating 95°C' },
-      { item: 'Kondisi V-Belt & Pulley', status: 'Fail', notes: 'V-belt terputus!' },
-      { item: 'Suara / Getaran Abnormal', status: 'Fail', notes: 'Bising tidak wajar' }
-    ],
-    meterReading: '8,120 Jam'
+// Native Direct REST API Upsert Helper
+async function upsertTableDirect(table, rows) {
+  const cfg = getSupabaseConfig();
+  if (!cfg.url || !cfg.key || !rows || rows.length === 0) return;
+
+  const endpoint = `${cfg.url}/rest/v1/${table}`;
+  const headers = {
+    'apikey': cfg.key,
+    'Authorization': `Bearer ${cfg.key}`,
+    'Content-Type': 'application/json',
+    'Prefer': 'resolution=merge-duplicates'
+  };
+
+  try {
+    const res = await fetch(endpoint, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(rows)
+    });
+    if (!res.ok) {
+      console.error(`Supabase REST upsert error on ${table}:`, await res.text());
+    }
+  } catch (err) {
+    console.error(`Supabase REST upsert exception on ${table}:`, err);
   }
-];
+}
 
-const DEFAULT_INVENTORY = [
-  {
-    id: 'PRT-001',
-    code: 'OIL-HYD-46',
-    name: 'Oli Hydrolik Shell Tellus S2 V46',
-    category: 'Pelumas & Kimia',
-    stock: 85,
-    minStock: 20,
-    unit: 'Liter',
-    unitPrice: 85000,
-    location: 'Rak A1 - Gudang Utama',
-    supplier: 'PT Shell Indonesia'
-  },
-  {
-    id: 'PRT-002',
-    code: 'SEAL-SPN-VF2',
-    name: 'O-Ring Seal Spindle Kit Haas',
-    category: 'Seal & Gasket',
-    stock: 3,
-    minStock: 5,
-    unit: 'Set',
-    unitPrice: 350000,
-    location: 'Rak B3 - Sparepart Presisi',
-    supplier: 'Haas Official Sparepart'
-  },
-  {
-    id: 'PRT-003',
-    code: 'FLT-CAT-3508',
-    name: 'Filter Oli Genset Cat 3508',
-    category: 'Filter',
-    stock: 12,
-    minStock: 4,
-    unit: 'Pcs',
-    unitPrice: 450000,
-    location: 'Rak C2 - Power House Parts',
-    supplier: 'PT Trakindo Utama'
-  },
-  {
-    id: 'PRT-004',
-    code: 'BLT-B72-HD',
-    name: 'V-Belt B-72 Industrial Heavy Duty',
-    category: 'Mekanikal',
-    stock: 4,
-    minStock: 8,
-    unit: 'Pcs',
-    unitPrice: 175000,
-    location: 'Rak A4 - Belt & Chain',
-    supplier: 'PT Optibelt Indonesia'
-  },
-  {
-    id: 'PRT-005',
-    code: 'BRG-6205-2RS',
-    name: 'Bearing SKF 6205-2RS1 Deep Groove',
-    category: 'Mekanikal',
-    stock: 24,
-    minStock: 10,
-    unit: 'Pcs',
-    unitPrice: 95000,
-    location: 'Rak B1 - Bearing & Bushing',
-    supplier: 'PT SKF Indonesia'
+// Native Direct REST API Delete Helper
+async function deleteTableDirect(table, id) {
+  const cfg = getSupabaseConfig();
+  if (!cfg.url || !cfg.key || !id) return;
+
+  const endpoint = `${cfg.url}/rest/v1/${table}?id=eq.${encodeURIComponent(id)}`;
+  const headers = {
+    'apikey': cfg.key,
+    'Authorization': `Bearer ${cfg.key}`
+  };
+
+  try {
+    const res = await fetch(endpoint, {
+      method: 'DELETE',
+      headers
+    });
+    if (!res.ok) {
+      console.error(`Supabase REST delete error on ${table}:`, await res.text());
+    }
+  } catch (err) {
+    console.error(`Supabase REST delete exception on ${table}:`, err);
   }
-];
-
-const DEFAULT_TECHNICIANS = [
-  { id: 'TCH-001', name: 'Budi Santoso', role: 'Teknisi Mekanik', phone: '0812-3456-7890' },
-  { id: 'TCH-002', name: 'Rian Hidayat', role: 'HVAC Specialist', phone: '0813-9876-5432' },
-  { id: 'TCH-003', name: 'Ahmad Fauzi', role: 'Teknisi Senior', phone: '0815-1122-3344' },
-  { id: 'TCH-004', name: 'Eko Prasetyo', role: 'Teknisi Listrik / Automation', phone: '0811-5566-7788' }
-];
-
-const DEFAULT_TEAM = [
-  {
-    id: 'TM-001',
-    name: 'Ahmad Fauzi',
-    phone: '0812-3456-7890',
-    email: 'ahmad.fauzi@pt-indonesia.com',
-    company: 'PT Industri Manufaktur Indonesia',
-    role: 'Teknisi',
-    position: 'Senior Mechanical Technician'
-  },
-  {
-    id: 'TM-002',
-    name: 'Budi Santoso',
-    phone: '0813-9876-5432',
-    email: 'budi.santoso@pt-indonesia.com',
-    company: 'PT Industri Manufaktur Indonesia',
-    role: 'Teknisi',
-    position: 'Electrical & Automation Specialist'
-  },
-  {
-    id: 'TM-003',
-    name: 'Citra Dewi',
-    phone: '0811-2233-4455',
-    email: 'citra.dewi@pt-indonesia.com',
-    company: 'PT Industri Manufaktur Indonesia',
-    role: 'Manager',
-    position: 'Maintenance Manager'
-  },
-  {
-    id: 'TM-004',
-    name: 'Dedi Kurniawan',
-    phone: '0815-6677-8899',
-    email: 'dedi.kurniawan@pt-indonesia.com',
-    company: 'PT Industri Manufaktur Indonesia',
-    role: 'Supervisor',
-    position: 'Preventive Maintenance Supervisor'
-  }
-];
-
-const DEFAULT_VENDORS = [
-  {
-    id: 'VND-001',
-    name: 'PT Shell Indonesia',
-    email: 'info@shell-id.com',
-    contactPerson: 'Hendra Wijaya',
-    phone: '021-555-1234',
-    address: 'Jl. TB Simatupang No. 18, Jakarta Selatan'
-  },
-  {
-    id: 'VND-002',
-    name: 'PT SKF Bearings Indonesia',
-    email: 'sales@skf-id.com',
-    contactPerson: 'Maya Putri',
-    phone: '021-888-9900',
-    address: 'Kawasan Industri Pulo Gadung, Jakarta Timur'
-  },
-  {
-    id: 'VND-003',
-    name: 'PT Haas Machinery Indonesia',
-    email: 'support@haas-id.com',
-    contactPerson: 'Rudi Hartono',
-    phone: '021-777-4433',
-    address: 'Kawasan Delta Silicon, Cikarang, Bekasi'
-  }
-];
+}
 
 export class StorageManager {
   static get(key) {
@@ -515,31 +123,164 @@ export class StorageManager {
     localStorage.setItem(key, JSON.stringify(value));
   }
 
-  static init() {
-    if (!localStorage.getItem(STORAGE_KEYS.ASSETS)) {
-      this.set(STORAGE_KEYS.ASSETS, DEFAULT_ASSETS);
+  // Clear legacy dummy cache if present
+  static purgeLegacyDummyCache() {
+    const teamData = this.get(STORAGE_KEYS.TEAM);
+    if (teamData && teamData.some(m => m.id === 'TM-001' || m.name === 'Ahmad Fauzi')) {
+      console.log('Purging legacy dummy cache from LocalStorage...');
+      Object.values(STORAGE_KEYS).forEach(k => localStorage.removeItem(k));
     }
-    if (!localStorage.getItem(STORAGE_KEYS.WORK_ORDERS)) {
-      this.set(STORAGE_KEYS.WORK_ORDERS, DEFAULT_WORK_ORDERS);
+  }
+
+  // Load all 7 tables live from Supabase PostgreSQL
+  static async loadAllFromSupabase() {
+    this.purgeLegacyDummyCache();
+
+    console.log('Fetching live data from Supabase tables...');
+
+    // 1. Assets Table
+    const assetsData = await fetchTableDirect('assets');
+    if (assetsData) {
+      const assets = assetsData.map(a => ({
+        id: a.id,
+        name: a.name || '',
+        category: a.category || '',
+        location: a.location || '',
+        status: a.status || 'Operasional',
+        criticality: a.criticality || 'Sedang',
+        serialNumber: a.serial_number || '',
+        manufacturer: a.manufacturer || '',
+        model: a.model || '',
+        purchaseDate: a.purchase_date || '',
+        purchaseCost: Number(a.purchase_cost || 0),
+        yearMade: a.year_made || null,
+        installationYear: a.installation_year || null,
+        lastMaintenance: a.last_maintenance || '',
+        nextPMDate: a.next_pm_date || '',
+        specifications: a.specifications || '',
+        image: a.image || ''
+      }));
+      this.set(STORAGE_KEYS.ASSETS, assets);
     }
-    if (!localStorage.getItem(STORAGE_KEYS.PM_SCHEDULES)) {
-      this.set(STORAGE_KEYS.PM_SCHEDULES, DEFAULT_PM_SCHEDULES);
+
+    // 2. Work Orders Table
+    const woData = await fetchTableDirect('work_orders');
+    if (woData) {
+      const wos = woData.map(w => ({
+        id: w.id,
+        title: w.title || '',
+        assetId: w.asset_id || '',
+        assetName: w.asset_name || '',
+        type: w.type || 'Corrective',
+        priority: w.priority || 'Sedang',
+        status: w.status || 'Disetujui',
+        assignedTech: w.assigned_tech || '',
+        createdDate: w.created_date || new Date().toISOString(),
+        targetDate: w.target_date || null,
+        completedDate: w.completed_date || null,
+        problemDescription: w.problem_description || '',
+        resolutionNotes: w.resolution_notes || '',
+        estimatedHours: Number(w.estimated_hours || 0),
+        actualHours: Number(w.actual_hours || 0),
+        partsUsed: Array.isArray(w.parts_used) ? w.parts_used : (typeof w.parts_used === 'string' ? JSON.parse(w.parts_used || '[]') : []),
+        totalCost: Number(w.total_cost || 0)
+      }));
+      this.set(STORAGE_KEYS.WORK_ORDERS, wos);
     }
-    if (!localStorage.getItem(STORAGE_KEYS.INSPECTIONS)) {
-      this.set(STORAGE_KEYS.INSPECTIONS, DEFAULT_INSPECTIONS);
+
+    // 3. PM Schedules Table
+    const pmData = await fetchTableDirect('pm_schedules');
+    if (pmData) {
+      const pms = pmData.map(p => ({
+        id: p.id,
+        title: p.title || '',
+        assetId: p.asset_id || '',
+        assetName: p.asset_name || '',
+        frequency: p.frequency || 'Bulanan',
+        intervalDays: Number(p.interval_days || 30),
+        lastCompleted: p.last_completed || null,
+        nextDueDate: p.next_due_date || null,
+        status: p.status || 'Normal',
+        assignedTech: p.assigned_tech || '',
+        checklist: Array.isArray(p.checklist) ? p.checklist : (typeof p.checklist === 'string' ? JSON.parse(p.checklist || '[]') : [])
+      }));
+      this.set(STORAGE_KEYS.PM_SCHEDULES, pms);
     }
-    if (!localStorage.getItem(STORAGE_KEYS.INVENTORY)) {
-      this.set(STORAGE_KEYS.INVENTORY, DEFAULT_INVENTORY);
+
+    // 4. Inspections Table
+    const inspData = await fetchTableDirect('inspections');
+    if (inspData) {
+      const insps = inspData.map(i => ({
+        id: i.id,
+        title: i.title || '',
+        assetId: i.asset_id || '',
+        assetName: i.asset_name || '',
+        inspector: i.inspector || '',
+        date: i.date || new Date().toISOString(),
+        overallResult: i.overall_result || 'Lulus',
+        checklistItems: Array.isArray(i.checklist_items) ? i.checklist_items : (typeof i.checklist_items === 'string' ? JSON.parse(i.checklist_items || '[]') : []),
+        meterReading: i.meter_reading || ''
+      }));
+      this.set(STORAGE_KEYS.INSPECTIONS, insps);
     }
-    if (!localStorage.getItem(STORAGE_KEYS.TECHNICIANS)) {
-      this.set(STORAGE_KEYS.TECHNICIANS, DEFAULT_TECHNICIANS);
+
+    // 5. Inventory Table
+    const invData = await fetchTableDirect('inventory');
+    if (invData) {
+      const inv = invData.map(i => ({
+        id: i.id,
+        code: i.code || '',
+        name: i.name || '',
+        category: i.category || '',
+        stock: Number(i.stock || 0),
+        minStock: Number(i.min_stock || 5),
+        unit: i.unit || 'Pcs',
+        unitPrice: Number(i.unit_price || 0),
+        location: i.location || '',
+        supplier: i.supplier || ''
+      }));
+      this.set(STORAGE_KEYS.INVENTORY, inv);
     }
-    if (!localStorage.getItem(STORAGE_KEYS.TEAM)) {
-      this.set(STORAGE_KEYS.TEAM, DEFAULT_TEAM);
+
+    // 6. Teams Table
+    const teamData = await fetchTableDirect('teams');
+    if (teamData) {
+      const team = teamData.map(t => ({
+        id: t.id,
+        name: t.name || '',
+        phone: t.phone || '',
+        email: t.email || '',
+        company: t.company || '',
+        role: t.role || 'Teknisi',
+        position: t.position || ''
+      }));
+      this.set(STORAGE_KEYS.TEAM, team);
+      this.set(STORAGE_KEYS.TECHNICIANS, team);
     }
-    if (!localStorage.getItem(STORAGE_KEYS.VENDORS)) {
-      this.set(STORAGE_KEYS.VENDORS, DEFAULT_VENDORS);
+
+    // 7. Vendors Table
+    const vendorData = await fetchTableDirect('vendors');
+    if (vendorData) {
+      const vendors = vendorData.map(v => ({
+        id: v.id,
+        name: v.name || '',
+        email: v.email || '',
+        contactPerson: v.contact_person || '',
+        phone: v.phone || '',
+        address: v.address || ''
+      }));
+      this.set(STORAGE_KEYS.VENDORS, vendors);
     }
+
+    console.log('Berhasil memuat 100% data live dari Supabase PostgreSQL tables!');
+    if (window.navigateTo && window.currentView) {
+      window.navigateTo(window.currentView);
+    }
+    return true;
+  }
+
+  static async init() {
+    await this.loadAllFromSupabase();
   }
 
   // Getters
@@ -552,262 +293,173 @@ export class StorageManager {
   static getTeam() { return this.get(STORAGE_KEYS.TEAM) || []; }
   static getVendors() { return this.get(STORAGE_KEYS.VENDORS) || []; }
 
-  // Setters
-  static saveAssets(assets) {
+  // Setters with Immediate Direct Supabase REST Upsert
+  static async saveAssets(assets) {
     this.set(STORAGE_KEYS.ASSETS, assets);
-    this.syncAssetsToSupabase(assets);
+    await this.syncAssetsToSupabase(assets);
   }
 
-  static saveWorkOrders(wos) {
+  static async saveWorkOrders(wos) {
     this.set(STORAGE_KEYS.WORK_ORDERS, wos);
-    this.syncWorkOrdersToSupabase(wos);
+    await this.syncWorkOrdersToSupabase(wos);
   }
 
-  static savePMSchedules(pms) {
+  static async savePMSchedules(pms) {
     this.set(STORAGE_KEYS.PM_SCHEDULES, pms);
-    this.syncPMSchedulesToSupabase(pms);
+    await this.syncPMSchedulesToSupabase(pms);
   }
 
-  static saveInspections(insps) {
+  static async saveInspections(insps) {
     this.set(STORAGE_KEYS.INSPECTIONS, insps);
-    this.syncInspectionsToSupabase(insps);
+    await this.syncInspectionsToSupabase(insps);
   }
 
-  static saveInventory(inv) {
+  static async saveInventory(inv) {
     this.set(STORAGE_KEYS.INVENTORY, inv);
-    this.syncInventoryToSupabase(inv);
+    await this.syncInventoryToSupabase(inv);
   }
 
-  static saveTeam(team) {
+  static async saveTeam(team) {
     this.set(STORAGE_KEYS.TEAM, team);
-    this.syncTeamToSupabase(team);
+    this.set(STORAGE_KEYS.TECHNICIANS, team);
+    await this.syncTeamToSupabase(team);
   }
 
-  static saveVendors(vendors) {
+  static async saveVendors(vendors) {
     this.set(STORAGE_KEYS.VENDORS, vendors);
-    this.syncVendorsToSupabase(vendors);
+    await this.syncVendorsToSupabase(vendors);
+  }
+
+  // Delete record from Supabase table
+  static async deleteFromSupabase(table, id) {
+    await deleteTableDirect(table, id);
   }
 
   // Sync helpers to Supabase Cloud
   static async syncAssetsToSupabase(assets) {
-    const client = getSupabaseClient();
-    if (!client) return;
-
-    try {
-      const rows = assets.map(a => ({
-        id: a.id,
-        name: a.name,
-        category: a.category,
-        location: a.location,
-        status: a.status,
-        criticality: a.criticality,
-        serial_number: a.serialNumber,
-        manufacturer: a.manufacturer,
-        model: a.model,
-        purchase_date: a.purchaseDate || null,
-        purchase_cost: a.purchaseCost || 0,
-        year_made: a.yearMade || null,
-        installation_year: a.installationYear || null,
-        last_maintenance: a.lastMaintenance || null,
-        next_pm_date: a.nextPMDate || null,
-        specifications: a.specifications,
-        image: a.image
-      }));
-
-      const { error } = await client.from('assets').upsert(rows);
-      if (error) console.error('Supabase assets upsert error:', error);
-    } catch (e) {
-      console.error('Supabase assets sync exception:', e);
-    }
+    const rows = assets.map(a => ({
+      id: a.id,
+      name: a.name,
+      category: a.category,
+      location: a.location,
+      status: a.status,
+      criticality: a.criticality,
+      serial_number: a.serialNumber || null,
+      manufacturer: a.manufacturer || null,
+      model: a.model || null,
+      purchase_date: a.purchaseDate || null,
+      purchase_cost: a.purchaseCost || 0,
+      year_made: a.yearMade || null,
+      installation_year: a.installationYear || null,
+      last_maintenance: a.lastMaintenance || null,
+      next_pm_date: a.nextPMDate || null,
+      specifications: a.specifications || null,
+      image: a.image || null
+    }));
+    await upsertTableDirect('assets', rows);
   }
 
   static async syncWorkOrdersToSupabase(wos) {
-    const client = getSupabaseClient();
-    if (!client) return;
-
-    try {
-      const rows = wos.map(w => ({
-        id: w.id,
-        title: w.title,
-        asset_id: w.assetId,
-        asset_name: w.assetName,
-        type: w.type,
-        priority: w.priority,
-        status: w.status,
-        assigned_tech: w.assignedTech,
-        created_date: w.createdDate,
-        target_date: w.targetDate || null,
-        completed_date: w.completedDate || null,
-        problem_description: w.problemDescription,
-        resolution_notes: w.resolutionNotes,
-        estimated_hours: w.estimatedHours || 0,
-        actual_hours: w.actualHours || 0,
-        parts_used: w.partsUsed || [],
-        total_cost: w.totalCost || 0
-      }));
-
-      const { error } = await client.from('work_orders').upsert(rows);
-      if (error) console.error('Supabase work_orders upsert error:', error);
-    } catch (e) {
-      console.error('Supabase work_orders sync exception:', e);
-    }
+    const rows = wos.map(w => ({
+      id: w.id,
+      title: w.title,
+      asset_id: w.assetId || null,
+      asset_name: w.assetName || null,
+      type: w.type || 'Corrective',
+      priority: w.priority || 'Sedang',
+      status: w.status || 'Disetujui',
+      assigned_tech: w.assignedTech || null,
+      created_date: w.createdDate,
+      target_date: w.targetDate || null,
+      completed_date: w.completedDate || null,
+      problem_description: w.problemDescription || null,
+      resolution_notes: w.resolutionNotes || null,
+      estimated_hours: w.estimatedHours || 0,
+      actual_hours: w.actualHours || 0,
+      parts_used: w.partsUsed || [],
+      total_cost: w.totalCost || 0
+    }));
+    await upsertTableDirect('work_orders', rows);
   }
 
   static async syncPMSchedulesToSupabase(pms) {
-    const client = getSupabaseClient();
-    if (!client) return;
-
-    try {
-      const rows = pms.map(p => ({
-        id: p.id,
-        title: p.title,
-        asset_id: p.assetId,
-        asset_name: p.assetName,
-        frequency: p.frequency,
-        interval_days: p.intervalDays || 30,
-        last_completed: p.lastCompleted || null,
-        next_due_date: p.nextDueDate || null,
-        status: p.status,
-        assigned_tech: p.assignedTech,
-        checklist: p.checklist || []
-      }));
-
-      const { error } = await client.from('pm_schedules').upsert(rows);
-      if (error) console.error('Supabase pm_schedules upsert error:', error);
-    } catch (e) {
-      console.error('Supabase pm_schedules sync exception:', e);
-    }
+    const rows = pms.map(p => ({
+      id: p.id,
+      title: p.title,
+      asset_id: p.assetId || null,
+      asset_name: p.assetName || null,
+      frequency: p.frequency || 'Bulanan',
+      interval_days: p.intervalDays || 30,
+      last_completed: p.lastCompleted || null,
+      next_due_date: p.nextDueDate || null,
+      status: p.status || 'Normal',
+      assigned_tech: p.assignedTech || null,
+      checklist: p.checklist || []
+    }));
+    await upsertTableDirect('pm_schedules', rows);
   }
 
   static async syncInspectionsToSupabase(insps) {
-    const client = getSupabaseClient();
-    if (!client) return;
-
-    try {
-      const rows = insps.map(i => ({
-        id: i.id,
-        title: i.title,
-        asset_id: i.assetId,
-        asset_name: i.assetName,
-        inspector: i.inspector,
-        date: i.date,
-        overall_result: i.overallResult,
-        checklist_items: i.checklistItems || [],
-        meter_reading: i.meterReading
-      }));
-
-      const { error } = await client.from('inspections').upsert(rows);
-      if (error) console.error('Supabase inspections upsert error:', error);
-    } catch (e) {
-      console.error('Supabase inspections sync exception:', e);
-    }
+    const rows = insps.map(i => ({
+      id: i.id,
+      title: i.title,
+      asset_id: i.assetId || null,
+      asset_name: i.assetName || null,
+      inspector: i.inspector || null,
+      date: i.date,
+      overall_result: i.overallResult || 'Lulus',
+      checklist_items: i.checklistItems || [],
+      meter_reading: i.meterReading || null
+    }));
+    await upsertTableDirect('inspections', rows);
   }
 
   static async syncInventoryToSupabase(inv) {
-    const client = getSupabaseClient();
-    if (!client) return;
-
-    try {
-      const rows = inv.map(i => ({
-        id: i.id,
-        code: i.code,
-        name: i.name,
-        category: i.category,
-        stock: i.stock || 0,
-        min_stock: i.minStock || 5,
-        unit: i.unit,
-        unit_price: i.unitPrice || 0,
-        location: i.location,
-        supplier: i.supplier
-      }));
-
-      const { error } = await client.from('inventory').upsert(rows);
-      if (error) console.error('Supabase inventory upsert error:', error);
-    } catch (e) {
-      console.error('Supabase inventory sync exception:', e);
-    }
+    const rows = inv.map(i => ({
+      id: i.id,
+      code: i.code,
+      name: i.name,
+      category: i.category || null,
+      stock: i.stock || 0,
+      min_stock: i.minStock || 5,
+      unit: i.unit || 'Pcs',
+      unit_price: i.unitPrice || 0,
+      location: i.location || null,
+      supplier: i.supplier || null
+    }));
+    await upsertTableDirect('inventory', rows);
   }
 
   static async syncTeamToSupabase(team) {
-    const client = getSupabaseClient();
-    if (!client) return;
-
-    try {
-      const rows = team.map(t => ({
-        id: t.id,
-        name: t.name,
-        phone: t.phone,
-        email: t.email,
-        company: t.company,
-        role: t.role,
-        position: t.position
-      }));
-
-      const { error } = await client.from('teams').upsert(rows);
-      if (error) console.error('Supabase team upsert error:', error);
-    } catch (e) {
-      console.error('Supabase team sync exception:', e);
-    }
+    const rows = team.map(t => ({
+      id: t.id,
+      name: t.name,
+      phone: t.phone || null,
+      email: t.email || null,
+      company: t.company || null,
+      role: t.role || 'Teknisi',
+      position: t.position || null
+    }));
+    await upsertTableDirect('teams', rows);
   }
 
   static async syncVendorsToSupabase(vendors) {
-    const client = getSupabaseClient();
-    if (!client) return;
-
-    try {
-      const rows = vendors.map(v => ({
-        id: v.id,
-        name: v.name,
-        email: v.email,
-        contact_person: v.contactPerson,
-        phone: v.phone,
-        address: v.address
-      }));
-
-      const { error } = await client.from('vendors').upsert(rows);
-      if (error) console.error('Supabase vendors upsert error:', error);
-    } catch (e) {
-      console.error('Supabase vendors sync exception:', e);
-    }
+    const rows = vendors.map(v => ({
+      id: v.id,
+      name: v.name,
+      email: v.email || null,
+      contact_person: v.contactPerson || null,
+      phone: v.phone || null,
+      address: v.address || null
+    }));
+    await upsertTableDirect('vendors', rows);
   }
 
-  // 1-Click Sync All Local Data to Supabase
   static async syncAllLocalToSupabase() {
-    const client = getSupabaseClient();
-    if (!client) {
-      showToast('Koneksi Supabase belum diatur. Masukkan URL & Anon Key di menu pengaturan.', 'warning');
-      return false;
-    }
-
-    try {
-      showToast('Memulai sinkronisasi data ke Supabase Cloud...', 'info');
-
-      await this.syncAssetsToSupabase(this.getAssets());
-      await this.syncWorkOrdersToSupabase(this.getWorkOrders());
-      await this.syncPMSchedulesToSupabase(this.getPMSchedules());
-      await this.syncInspectionsToSupabase(this.getInspections());
-      await this.syncInventoryToSupabase(this.getInventory());
-      await this.syncTeamToSupabase(this.getTeam());
-      await this.syncVendorsToSupabase(this.getVendors());
-
-      showToast('Sinkronisasi ke Supabase Cloud BERHASIL!', 'success');
-      return true;
-    } catch (err) {
-      console.error('Failed to sync data to Supabase:', err);
-      showToast(`Gagal sinkronisasi: ${err.message}`, 'error');
-      return false;
-    }
+    return await this.loadAllFromSupabase();
   }
 
-  // Reset to default
   static resetToDefault() {
-    this.set(STORAGE_KEYS.ASSETS, DEFAULT_ASSETS);
-    this.set(STORAGE_KEYS.WORK_ORDERS, DEFAULT_WORK_ORDERS);
-    this.set(STORAGE_KEYS.PM_SCHEDULES, DEFAULT_PM_SCHEDULES);
-    this.set(STORAGE_KEYS.INSPECTIONS, DEFAULT_INSPECTIONS);
-    this.set(STORAGE_KEYS.INVENTORY, DEFAULT_INVENTORY);
-    this.set(STORAGE_KEYS.TECHNICIANS, DEFAULT_TECHNICIANS);
-    this.set(STORAGE_KEYS.TEAM, DEFAULT_TEAM);
-    this.set(STORAGE_KEYS.VENDORS, DEFAULT_VENDORS);
+    this.loadAllFromSupabase();
   }
 }

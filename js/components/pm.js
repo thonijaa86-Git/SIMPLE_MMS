@@ -40,35 +40,35 @@ export function renderPM() {
       <table class="table table-hover">
         <thead>
           <tr>
-            <th>NO</th>
-            <th>Kode PM</th>
-            <th>Judul Pemeliharaan</th>
-            <th>Aset</th>
-            <th>Frekuensi</th>
-            <th>Terakhir Dikerjakan</th>
-            <th>Jadwal Berikutnya</th>
-            <th>Status</th>
-            <th>Teknisi</th>
-            <th>Aksi</th>
+            <th class="col-no">NO</th>
+            <th class="col-id">Kode PM</th>
+            <th class="col-title">Judul Pemeliharaan</th>
+            <th class="col-asset">Aset</th>
+            <th class="col-type">Frekuensi</th>
+            <th class="col-date multiline-header">Terakhir<br>Dikerjakan</th>
+            <th class="col-date multiline-header">Jadwal<br>Berikutnya</th>
+            <th class="col-status">Status</th>
+            <th class="col-tech">Teknisi</th>
+            <th class="col-actions">Aksi</th>
           </tr>
         </thead>
         <tbody>
           ${pmSchedules.map((pm, index) => `
             <tr>
-              <td><strong>${index + 1}</strong></td>
-              <td><strong>${pm.id}</strong></td>
-              <td>
+              <td class="col-no"><strong>${index + 1}</strong></td>
+              <td class="col-id"><strong>${pm.id}</strong></td>
+              <td class="col-title">
                 <div class="font-medium">${pm.title}</div>
                 <small class="text-muted">${pm.checklist ? pm.checklist.length + ' Poin Checklist' : ''}</small>
               </td>
-              <td>${pm.assetName}</td>
-              <td><span class="badge badge-outline">${pm.frequency}</span></td>
-              <td>${formatDate(pm.lastCompleted)}</td>
-              <td><strong>${formatDate(pm.nextDueDate)}</strong></td>
-              <td><span class="badge ${statusPills[pm.status] || 'badge-gray'}">${pm.status}</span></td>
-              <td>${pm.assignedTech}</td>
-              <td>
-                <div class="btn-group">
+              <td class="col-asset">${pm.assetName}</td>
+              <td class="col-type"><span class="badge badge-outline">${pm.frequency}</span></td>
+              <td class="col-date">${formatDate(pm.lastCompleted)}</td>
+              <td class="col-date"><strong>${formatDate(pm.nextDueDate)}</strong></td>
+              <td class="col-status"><span class="badge ${statusPills[pm.status] || 'badge-gray'}">${pm.status}</span></td>
+              <td class="col-tech">${pm.assignedTech}</td>
+              <td class="col-actions">
+                <div class="btn-group" style="justify-content: flex-end;">
                   <button class="btn btn-icon btn-sm btn-primary" title="Generate WO Otomatis" onclick="window.triggerWOFromPM('${pm.id}')">
                     <i data-lucide="play-circle"></i>
                   </button>
@@ -196,6 +196,7 @@ window.deletePM = function(pmId) {
   pms = pms.filter(p => p.id !== pmId);
 
   StorageManager.savePMSchedules(pms);
+  StorageManager.deleteFromSupabase('pm_schedules', pmId);
   showToast(`Jadwal PM ${pmId} berhasil dihapus`, 'success');
   renderPM();
 };

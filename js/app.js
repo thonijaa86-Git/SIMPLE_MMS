@@ -14,12 +14,13 @@ import { renderInventory, setupInventoryListeners } from './components/inventory
 import { renderReports } from './components/reports.js';
 import { renderTeam, setupTeamListeners } from './components/team.js';
 import { renderVendors, setupVendorListeners } from './components/vendors.js';
+import { renderTechDashboard, renderTechWorkOrders, setupTechListeners } from './components/tech.js';
 
 let currentView = 'dashboard';
 
-document.addEventListener('DOMContentLoaded', () => {
-  // Initialize Storage Data
-  StorageManager.init();
+document.addEventListener('DOMContentLoaded', async () => {
+  // Initialize & fetch Storage Data from Supabase
+  await StorageManager.init();
 
   // Setup Theme (Dark / Light mode)
   initTheme();
@@ -33,6 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
   setupInventoryListeners();
   setupTeamListeners();
   setupVendorListeners();
+  setupTechListeners();
 
   // Setup Global Modal Close listeners
   initModals();
@@ -47,6 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // View Navigation Router
 export function navigateTo(viewName) {
   currentView = viewName;
+  window.currentView = viewName;
 
   // Update Sidebar & Mobile Bottom Nav Active State
   const navItems = document.querySelectorAll('.nav-item, .mobile-nav-item');
@@ -63,13 +66,15 @@ export function navigateTo(viewName) {
   const titles = {
     dashboard: 'Dashboard Utama & Analitik',
     assets: 'Pengelolaan Aset & Peralatan',
-    workorders: 'Surat Perintah Kerja (Work Order / SPK)',
+    workorders: 'Pengelolaan Work Order (WO)',
     pm: 'Preventive Maintenance (Pemeliharaan Rutin)',
     inspections: 'Pengelolaan Inspeksi & Safety Checklist',
     inventory: 'Manajemen Suku Cadang & Stok',
     reports: 'Laporan Performa & Ekspor Data',
     team: 'Pengelolaan Tim & Personil',
-    vendors: 'Pengelolaan Perusahaan'
+    vendors: 'Pengelolaan Perusahaan',
+    'tech-dashboard': 'Dashboard Performa Pekerjaan Teknisi',
+    'tech-workorders': 'Work Order Eksekusi (Area Teknisi)'
   };
 
   const titleEl = document.getElementById('page-header-title');
@@ -112,6 +117,12 @@ export function navigateTo(viewName) {
       break;
     case 'vendors':
       renderVendors();
+      break;
+    case 'tech-dashboard':
+      renderTechDashboard();
+      break;
+    case 'tech-workorders':
+      renderTechWorkOrders();
       break;
     default:
       renderDashboard();

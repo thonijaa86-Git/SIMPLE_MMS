@@ -47,7 +47,7 @@ export function renderReports() {
         <div class="kpi-icon icon-green"><i data-lucide="check-circle-2"></i></div>
         <div class="kpi-details">
           <div class="kpi-label">WO Terselesaikan</div>
-          <div class="kpi-value">${totalCompletedWO} <span class="kpi-sub">SPK</span></div>
+          <div class="kpi-value">${totalCompletedWO} <span class="kpi-sub">WO</span></div>
         </div>
       </div>
       <div class="kpi-card glass-card">
@@ -177,11 +177,12 @@ window.backupJSON = function() {
   showToast('Backup data JSON berhasil diunduh!', 'success');
 };
 
-window.resetSystemData = function() {
-  if (!confirm('Apakah Anda yakin ingin mereset seluruh data aplikasi kembali ke sampel default awal? Data perubahan Anda saat ini akan ditimpa.')) return;
+window.resetSystemData = async function() {
+  if (!confirm('Apakah Anda yakin ingin menyegarkan ulang seluruh data dari database Supabase Cloud?')) return;
 
-  StorageManager.resetToDefault();
-  showToast('Data sistem berhasil di-reset ke sampel default!', 'success');
+  showToast('Memuat ulang data dari Supabase...', 'info');
+  await StorageManager.loadAllFromSupabase();
+  showToast('Data sistem berhasil diperbarui dari Supabase Database!', 'success');
 
   // Reload current view
   if (window.navigateTo) window.navigateTo('dashboard');

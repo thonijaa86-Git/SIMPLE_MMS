@@ -42,17 +42,17 @@ export function renderInventory() {
       <table class="table table-hover">
         <thead>
           <tr>
-            <th>NO</th>
-            <th>Kode Part</th>
-            <th>Nama Suku Cadang</th>
-            <th>Kategori</th>
-            <th>Stok / Satuan</th>
-            <th>Stok Min.</th>
-            <th>Harga Satuan</th>
-            <th>Lokasi Rak</th>
-            <th>Supplier</th>
-            <th>Status Stok</th>
-            <th>Aksi</th>
+            <th class="col-no">NO</th>
+            <th class="col-code">Kode Part</th>
+            <th class="col-main">Nama Suku Cadang</th>
+            <th class="col-category">Kategori</th>
+            <th class="col-stock">Stok / Satuan</th>
+            <th class="col-stock">Stok Min.</th>
+            <th class="col-price">Harga Satuan</th>
+            <th class="col-asset">Lokasi Rak</th>
+            <th class="col-tech">Supplier</th>
+            <th class="col-status">Status Stok</th>
+            <th class="col-actions">Aksi</th>
           </tr>
         </thead>
         <tbody>
@@ -60,25 +60,25 @@ export function renderInventory() {
             const isLowStock = item.stock <= item.minStock;
             return `
               <tr class="${isLowStock ? 'row-low-stock' : ''}">
-                <td><strong>${index + 1}</strong></td>
-                <td><strong>${item.code}</strong></td>
-                <td>
+                <td class="col-no"><strong>${index + 1}</strong></td>
+                <td class="col-code"><strong>${item.code}</strong></td>
+                <td class="col-main">
                   <div class="font-medium">${item.name}</div>
                   <small class="text-muted">ID: ${item.id}</small>
                 </td>
-                <td><span class="badge badge-outline">${item.category}</span></td>
-                <td><strong>${item.stock}</strong> ${item.unit}</td>
-                <td>${item.minStock} ${item.unit}</td>
-                <td>${formatIDR(item.unitPrice)}</td>
-                <td>${item.location || '-'}</td>
-                <td>${item.supplier || '-'}</td>
-                <td>
+                <td class="col-category"><span class="badge badge-outline">${item.category}</span></td>
+                <td class="col-stock"><strong>${item.stock}</strong> ${item.unit}</td>
+                <td class="col-stock">${item.minStock} ${item.unit}</td>
+                <td class="col-price">${formatIDR(item.unitPrice)}</td>
+                <td class="col-asset">${item.location || '-'}</td>
+                <td class="col-tech">${item.supplier || '-'}</td>
+                <td class="col-status">
                   <span class="badge ${isLowStock ? 'badge-danger' : 'badge-success'}">
                     ${isLowStock ? '⚠ Stok Minim' : '✓ Normal'}
                   </span>
                 </td>
-                <td>
-                  <div class="btn-group">
+                <td class="col-actions">
+                  <div class="btn-group" style="justify-content: flex-end;">
                     <button class="btn btn-icon btn-sm btn-outline-success" title="Tambah Stok (+1)" onclick="window.adjustStock('${item.id}', 1)">
                       <i data-lucide="plus"></i>
                     </button>

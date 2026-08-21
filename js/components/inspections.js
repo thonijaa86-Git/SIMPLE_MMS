@@ -34,36 +34,38 @@ export function renderInspections() {
       <table class="table table-hover">
         <thead>
           <tr>
-            <th>NO</th>
-            <th>Kode Inspeksi</th>
-            <th>Judul Inspeksi</th>
-            <th>Aset / Peralatan</th>
-            <th>Inspektur</th>
-            <th>Tanggal</th>
-            <th>Meter Reading</th>
-            <th>Hasil Akhir</th>
-            <th>Aksi</th>
+            <th class="col-no">NO</th>
+            <th class="col-id">Kode Inspeksi</th>
+            <th class="col-title">Judul Inspeksi</th>
+            <th class="col-asset">Aset / Peralatan</th>
+            <th class="col-inspector">Inspektur</th>
+            <th class="col-date">Tanggal</th>
+            <th class="col-number">Meter Reading</th>
+            <th class="col-status">Hasil Akhir</th>
+            <th class="col-actions">Aksi</th>
           </tr>
         </thead>
         <tbody>
           ${inspections.map((insp, index) => `
             <tr>
-              <td><strong>${index + 1}</strong></td>
-              <td><strong>${insp.id}</strong></td>
-              <td>${insp.title}</td>
-              <td>${insp.assetName}</td>
-              <td>${insp.inspector}</td>
-              <td>${formatDateTime(insp.date)}</td>
-              <td>${insp.meterReading || '-'}</td>
-              <td>
+              <td class="col-no"><strong>${index + 1}</strong></td>
+              <td class="col-id"><strong>${insp.id}</strong></td>
+              <td class="col-title">${insp.title}</td>
+              <td class="col-asset">${insp.assetName}</td>
+              <td class="col-inspector">${insp.inspector}</td>
+              <td class="col-date">${formatDateTime(insp.date)}</td>
+              <td class="col-number">${insp.meterReading || '-'}</td>
+              <td class="col-status">
                 <span class="badge ${insp.overallResult === 'Lulus' ? 'badge-success' : 'badge-danger'}">
                   ${insp.overallResult === 'Lulus' ? '✓ LULUS' : '✗ GAGAL'}
                 </span>
               </td>
-              <td>
-                <button class="btn btn-icon btn-sm btn-outline-primary" title="Lihat Detail Inspeksi" onclick="window.viewInspectionDetail('${insp.id}')">
-                  <i data-lucide="eye"></i>
-                </button>
+              <td class="col-actions">
+                <div class="btn-group" style="justify-content: flex-end;">
+                  <button class="btn btn-icon btn-sm btn-outline-primary" title="Lihat Detail Inspeksi" onclick="window.viewInspectionDetail('${insp.id}')">
+                    <i data-lucide="eye"></i>
+                  </button>
+                </div>
               </td>
             </tr>
           `).join('')}

@@ -43,28 +43,28 @@ export function renderVendors() {
       <table class="table table-hover">
         <thead>
           <tr>
-            <th>NO</th>
-            <th>Nama Perusahaan</th>
-            <th>Contact Person</th>
-            <th>Email</th>
-            <th>No. Telepon</th>
-            <th>Alamat</th>
-            <th style="text-align: right;">Aksi</th>
+            <th class="col-no">NO</th>
+            <th class="col-main">Nama Perusahaan</th>
+            <th class="col-person">Contact Person</th>
+            <th class="col-person">Email</th>
+            <th class="col-date">No. Telepon</th>
+            <th class="col-asset">Alamat</th>
+            <th class="col-actions">Aksi</th>
           </tr>
         </thead>
         <tbody>
           ${filtered.map((vendor, index) => `
             <tr>
-              <td><strong>${index + 1}</strong></td>
-              <td>
+              <td class="col-no"><strong>${index + 1}</strong></td>
+              <td class="col-main">
                 <div class="font-medium">${vendor.name}</div>
                 <small class="text-muted">ID: ${vendor.id}</small>
               </td>
-              <td><i data-lucide="user" style="width: 14px; height: 14px; vertical-align: middle;"></i> ${vendor.contactPerson || '-'}</td>
-              <td><i data-lucide="mail" style="width: 14px; height: 14px; vertical-align: middle;"></i> ${vendor.email || '-'}</td>
-              <td><i data-lucide="phone" style="width: 14px; height: 14px; vertical-align: middle;"></i> ${vendor.phone || '-'}</td>
-              <td><small><i data-lucide="map-pin" style="width: 14px; height: 14px; vertical-align: middle;"></i> ${vendor.address || '-'}</small></td>
-              <td style="text-align: right;">
+              <td class="col-person"><i data-lucide="user" style="width: 14px; height: 14px; vertical-align: middle;"></i> ${vendor.contactPerson || '-'}</td>
+              <td class="col-person"><i data-lucide="mail" style="width: 14px; height: 14px; vertical-align: middle;"></i> ${vendor.email || '-'}</td>
+              <td class="col-date"><i data-lucide="phone" style="width: 14px; height: 14px; vertical-align: middle;"></i> ${vendor.phone || '-'}</td>
+              <td class="col-asset"><small><i data-lucide="map-pin" style="width: 14px; height: 14px; vertical-align: middle;"></i> ${vendor.address || '-'}</small></td>
+              <td class="col-actions">
                 <div class="btn-group" style="justify-content: flex-end;">
                   <button class="btn btn-icon btn-sm btn-outline-secondary" title="Edit Perusahaan" onclick="window.openVendorModal('${vendor.id}')">
                     <i data-lucide="edit"></i>
@@ -169,6 +169,7 @@ window.deleteVendor = function(id) {
   let vendors = StorageManager.getVendors();
   vendors = vendors.filter(v => v.id !== id);
   StorageManager.saveVendors(vendors);
+  StorageManager.deleteFromSupabase('vendors', id);
 
   showToast('Data perusahaan berhasil dihapus!', 'info');
   renderVendors();

@@ -73,6 +73,16 @@
           <i data-lucide="building-2"></i>
           <span>Perusahaan</span>
         </a>
+
+        <div class="sidebar-nav-header">MENU TEKNISI</div>
+        <a href="#" class="nav-item" data-view="tech-dashboard">
+          <i data-lucide="gauge"></i>
+          <span>Dashboard Teknisi</span>
+        </a>
+        <a href="#" class="nav-item" data-view="tech-workorders">
+          <i data-lucide="wrench"></i>
+          <span>WO Eksekusi Teknisi</span>
+        </a>
       </nav>
 
       <div class="sidebar-footer">
@@ -148,13 +158,13 @@
                 <table class="table table-hover">
                   <thead>
                     <tr>
-                      <th>NO</th>
-                      <th>No. WO</th>
-                      <th>Judul SPK</th>
-                      <th>Prioritas</th>
-                      <th>Status</th>
-                      <th>Teknisi</th>
-                      <th>Tanggal</th>
+                      <th class="col-no">NO</th>
+                      <th class="col-id">No. WO</th>
+                      <th class="col-title">Deskripsi</th>
+                      <th class="col-priority">Prioritas</th>
+                      <th class="col-status">Status</th>
+                      <th class="col-tech">Teknisi</th>
+                      <th class="col-date">Tanggal</th>
                     </tr>
                   </thead>
                   <tbody id="dashboard-recent-wo-table"></tbody>
@@ -291,6 +301,104 @@
           <div id="vendors-list-container"></div>
         </section>
 
+        <!-- 10. TECHNICIAN DASHBOARD VIEW -->
+        <section id="view-tech-dashboard" class="view-container">
+          <div class="filter-bar margin-bottom-20">
+            <div class="search-input-group" style="max-width: 340px;">
+              <i data-lucide="user-check"></i>
+              <select id="tech-dash-filter-name" class="form-control">
+                <option value="">Semua Teknisi (Seluruh Tim)</option>
+              </select>
+            </div>
+            <div class="btn-group">
+              <button class="btn btn-outline-primary" onclick="window.navigateTo('tech-workorders')">
+                <i data-lucide="wrench"></i> Buka WO Eksekusi Teknisi
+              </button>
+            </div>
+          </div>
+
+          <!-- KPI Cards Grid for Technician -->
+          <div id="tech-dashboard-kpi-grid" class="kpi-grid"></div>
+
+          <!-- Charts & Analytics Grid -->
+          <div class="dashboard-grid margin-top-25">
+            <div class="glass-card">
+              <h3><i data-lucide="pie-chart"></i> Status Pekerjaan (WO) Teknisi</h3>
+              <div class="chart-box margin-top-15">
+                <canvas id="chartTechWOStatus"></canvas>
+              </div>
+            </div>
+
+            <div class="glass-card">
+              <h3><i data-lucide="bar-chart-2"></i> Perbandingan Jam Estimasi vs Jam Riil</h3>
+              <div class="chart-box margin-top-15">
+                <canvas id="chartTechPerformanceHours"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- Table of Technician Work Orders Performance -->
+          <div class="glass-card margin-top-25">
+            <div class="filter-bar margin-bottom-15" style="margin-bottom:0;">
+              <h3><i data-lucide="award"></i> Rincian Performa Pekerjaan WO Diterima</h3>
+              <button class="btn btn-sm btn-outline-primary" onclick="window.navigateTo('tech-workorders')">Kelola WO Teknisi</button>
+            </div>
+            <div class="table-responsive margin-top-15">
+              <table class="table table-hover">
+                <thead>
+                  <tr>
+                    <th class="col-no">NO</th>
+                    <th class="col-id">No. WO</th>
+                    <th class="col-title">Deskripsi Pekerjaan</th>
+                    <th class="col-asset">Aset</th>
+                    <th class="col-priority">Prioritas</th>
+                    <th class="col-status">Status</th>
+                    <th class="col-tech">Teknisi</th>
+                    <th class="col-date">Est. Jam</th>
+                    <th class="col-date">Riil Jam</th>
+                    <th class="col-status">Efisiensi</th>
+                  </tr>
+                </thead>
+                <tbody id="tech-dashboard-performance-table"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- 11. TECHNICIAN WORK ORDERS VIEW -->
+        <section id="view-tech-workorders" class="view-container">
+          <!-- Alert Banner for Technicians -->
+          <div class="alert-banner alert-warning-glass margin-bottom-20">
+            <div class="alert-icon"><i data-lucide="wrench"></i></div>
+            <div class="alert-content">
+              <strong>Area Eksekusi Lapangan Teknisi:</strong> 
+              Daftar Work Order (WO) berikut telah diterbitkan oleh Manager/Supervisor. Gunakan tombol 
+              <b>Mulai</b> saat mengeksekusi, <b>Minta Part</b> jika membutuhkan suku cadang, atau <b>Selesai</b> setelah perbaikan tuntas.
+            </div>
+          </div>
+
+          <div class="filter-bar">
+            <div class="search-input-group">
+              <i data-lucide="search"></i>
+              <input type="text" id="tech-wo-search" class="form-control" placeholder="Cari No. WO, aset, deskripsi, atau supervisor...">
+            </div>
+
+            <select id="tech-wo-filter-tech" class="form-control" style="max-width: 200px;">
+              <option value="">Semua Teknisi</option>
+            </select>
+
+            <select id="tech-wo-filter-status" class="form-control" style="max-width: 180px;">
+              <option value="">Semua Status</option>
+              <option value="Disetujui">Disetujui (Siap Kerjakan)</option>
+              <option value="Dalam Proses">Dalam Proses</option>
+              <option value="Menunggu Part">Menunggu Part</option>
+              <option value="Selesai">Selesai</option>
+            </select>
+          </div>
+
+          <div id="tech-workorders-list-container"></div>
+        </section>
+
       </main>
     </div>
   </div>
@@ -380,7 +488,7 @@
   <div id="modal-wo-form" class="modal-backdrop">
     <div class="modal-dialog modal-dialog-lg">
       <div class="modal-header">
-        <h3 id="modal-wo-title" class="modal-title">Buat Surat Perintah Kerja (SPK)</h3>
+        <h3 id="modal-wo-title" class="modal-title">Buat Work Order (WO)</h3>
         <button type="button" class="btn-modal-close" onclick="window.closeModal()">&times;</button>
       </div>
       <form id="form-wo" onsubmit="window.saveWorkOrderForm(event)">
@@ -388,7 +496,7 @@
           <input type="hidden" id="wo-form-id" />
           <div class="form-grid">
             <div class="form-group-full">
-              <label class="form-label">Judul Pekerjaan / SPK *</label>
+              <label class="form-label">Judul Work Order (WO) *</label>
               <input type="text" id="wo-form-title" class="form-control" required placeholder="Contoh: Perbaikan Suhu Spindle CNC Overheating">
             </div>
             <div>
@@ -446,7 +554,7 @@
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-outline-danger btn-modal-close" onclick="window.closeModal()">Batal</button>
-          <button type="submit" class="btn btn-primary">Terbitkan SPK</button>
+          <button type="submit" class="btn btn-primary">Terbitkan Work Order (WO)</button>
         </div>
       </form>
     </div>
@@ -486,11 +594,11 @@
     </div>
   </div>
 
-  <!-- Modal Printable Work Order Sheet (SPK) -->
+  <!-- Modal Printable Work Order (WO) Sheet -->
   <div id="modal-print-wo" class="modal-backdrop">
     <div class="modal-dialog modal-dialog-lg">
       <div class="modal-header">
-        <h3 class="modal-title">Preview Surat Perintah Kerja (SPK)</h3>
+        <h3 class="modal-title">Preview Work Order (WO)</h3>
         <button type="button" class="btn-modal-close" onclick="window.closeModal()">&times;</button>
       </div>
       <div class="modal-body" id="print-spk-content"></div>
@@ -786,7 +894,7 @@
     </a>
     <a href="#" class="mobile-nav-item" data-view="workorders">
       <i data-lucide="file-text"></i>
-      <span>SPK / WO</span>
+      <span>Work Order (WO)</span>
     </a>
     <a href="#" class="mobile-nav-item" data-view="pm">
       <i data-lucide="calendar"></i>

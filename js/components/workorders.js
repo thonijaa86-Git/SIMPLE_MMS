@@ -1,5 +1,5 @@
 /**
- * Work Order (SPK) Management Component for MMS
+ * Work Order (WO) Management Component for MMS
  */
 
 import { StorageManager } from '../storage.js';
@@ -79,41 +79,41 @@ function renderListView(container, workOrders) {
       <table class="table table-hover">
         <thead>
           <tr>
-            <th>NO</th>
-            <th>No. WO</th>
-            <th>Judul SPK / Masalah</th>
-            <th>Aset</th>
-            <th>Tipe</th>
-            <th>Prioritas</th>
-            <th>Status</th>
-            <th>Teknisi</th>
-            <th>Target Selesai</th>
-            <th>Aksi</th>
+            <th class="col-no">NO</th>
+            <th class="col-id">No. WO</th>
+            <th class="col-title">Deskripsi</th>
+            <th class="col-asset">Aset</th>
+            <th class="col-type">Tipe</th>
+            <th class="col-priority">Prioritas</th>
+            <th class="col-status">Status</th>
+            <th class="col-tech">Teknisi</th>
+            <th class="col-date multiline-header">Target<br>Selesai</th>
+            <th class="col-actions">Aksi</th>
           </tr>
         </thead>
         <tbody>
           ${workOrders.map((wo, index) => `
             <tr>
-              <td><strong>${index + 1}</strong></td>
-              <td><strong>${wo.id}</strong></td>
-              <td>
+              <td class="col-no"><strong>${index + 1}</strong></td>
+              <td class="col-id"><strong>${wo.id}</strong></td>
+              <td class="col-title">
                 <div class="font-medium">${wo.title}</div>
                 <small class="text-muted">${wo.problemDescription ? wo.problemDescription.substring(0, 50) + '...' : ''}</small>
               </td>
-              <td>${wo.assetName}</td>
-              <td><span class="badge badge-outline">${wo.type}</span></td>
-              <td><span class="${priorityPills[wo.priority] || ''}">${wo.priority}</span></td>
-              <td><span class="badge ${statusBadges[wo.status] || ''}">${wo.status}</span></td>
-              <td>${wo.assignedTech || '<em class="text-muted">Belum ditunjuk</em>'}</td>
-              <td>${formatDate(wo.targetDate)}</td>
-              <td>
-                <div class="btn-group">
+              <td class="col-asset">${wo.assetName}</td>
+              <td class="col-type"><span class="badge badge-outline">${wo.type}</span></td>
+              <td class="col-priority"><span class="${priorityPills[wo.priority] || ''}">${wo.priority}</span></td>
+              <td class="col-status"><span class="badge ${statusBadges[wo.status] || ''}">${wo.status}</span></td>
+              <td class="col-tech">${wo.assignedTech || '<em class="text-muted">Belum ditunjuk</em>'}</td>
+              <td class="col-date">${formatDate(wo.targetDate)}</td>
+              <td class="col-actions">
+                <div class="btn-group" style="justify-content: flex-end;">
                   ${wo.status !== 'Selesai' && wo.status !== 'Dibatalkan' ? `
                     <button class="btn btn-icon btn-sm btn-outline-success" title="Selesaikan WO" onclick="window.openCompleteWOModal('${wo.id}')">
                       <i data-lucide="check-square"></i>
                     </button>
                   ` : ''}
-                  <button class="btn btn-icon btn-sm btn-outline-primary" title="Cetak SPK" onclick="window.printWorkOrder('${wo.id}')">
+                  <button class="btn btn-icon btn-sm btn-outline-primary" title="Cetak Work Order (WO)" onclick="window.printWorkOrder('${wo.id}')">
                     <i data-lucide="printer"></i>
                   </button>
                   <button class="btn btn-icon btn-sm btn-outline-secondary" title="Edit WO" onclick="window.openWorkOrderModal('${wo.id}')">
@@ -226,7 +226,7 @@ window.openWorkOrderModal = function(woId = null) {
   form.reset();
 
   if (woId) {
-    titleEl.textContent = 'Edit Surat Perintah Kerja (SPK)';
+    titleEl.textContent = 'Edit Work Order (WO)';
     const wos = StorageManager.getWorkOrders();
     const wo = wos.find(w => w.id === woId);
 
@@ -243,7 +243,7 @@ window.openWorkOrderModal = function(woId = null) {
       document.getElementById('wo-form-desc').value = wo.problemDescription || '';
     }
   } else {
-    titleEl.textContent = 'Buat Surat Perintah Kerja (SPK) Baru';
+    titleEl.textContent = 'Buat Work Order (WO) Baru';
     document.getElementById('wo-form-id').value = '';
     // Set default target date to 2 days from now
     const nextDate = new Date(Date.now() + 48*60*60*1000).toISOString().slice(0, 16);
@@ -269,7 +269,7 @@ window.saveWorkOrderForm = function(e) {
   const problemDescription = document.getElementById('wo-form-desc').value.trim();
 
   if (!title || !assetId) {
-    showToast('Harap isi Judul SPK dan pilih Aset terkait.', 'warning');
+    showToast('Harap isi Judul Work Order (WO) dan pilih Aset terkait.', 'warning');
     return;
   }
 
@@ -362,7 +362,7 @@ window.saveCompleteWO = function(e) {
   renderWorkOrders();
 };
 
-// Printable SPK / Work Order Sheet Generator
+// Printable Work Order (WO) Sheet Generator
 window.printWorkOrder = function(woId) {
   const wos = StorageManager.getWorkOrders();
   const assets = StorageManager.getAssets();
@@ -383,7 +383,7 @@ window.printWorkOrder = function(woId) {
           <p>Departemen Maintenance & Engineering Facilities</p>
         </div>
         <div class="spk-title-box">
-          <h1>SURAT PERINTAH KERJA (SPK)</h1>
+          <h1>WORK ORDER (WO)</h1>
           <div class="spk-no">${wo.id}</div>
         </div>
       </div>
@@ -412,7 +412,7 @@ window.printWorkOrder = function(woId) {
         <tr>
           <td><strong>Teknisi Penanggung Jawab:</strong></td>
           <td>${wo.assignedTech || 'Mekanik Shift On-Duty'}</td>
-          <td><strong>Status SPK:</strong></td>
+          <td><strong>Status Work Order (WO):</strong></td>
           <td>${wo.status}</td>
         </tr>
       </table>
@@ -489,6 +489,7 @@ window.deleteWorkOrder = function(woId) {
   wos = wos.filter(w => w.id !== woId);
 
   StorageManager.saveWorkOrders(wos);
+  StorageManager.deleteFromSupabase('work_orders', woId);
   showToast(`Work Order ${woId} berhasil dihapus`, 'success');
   renderWorkOrders();
 };

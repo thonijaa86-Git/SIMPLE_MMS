@@ -51,31 +51,31 @@ export function renderTeam() {
       <table class="table table-hover">
         <thead>
           <tr>
-            <th>NO</th>
-            <th>Nama Personil</th>
-            <th>Role & Jabatan</th>
-            <th>No. Telepon</th>
-            <th>Email</th>
-            <th>Perusahaan</th>
-            <th style="text-align: right;">Aksi</th>
+            <th class="col-no">NO</th>
+            <th class="col-person">Nama Personil</th>
+            <th class="col-type">Role & Jabatan</th>
+            <th class="col-date">No. Telepon</th>
+            <th class="col-person">Email</th>
+            <th class="col-asset">Perusahaan</th>
+            <th class="col-actions">Aksi</th>
           </tr>
         </thead>
         <tbody>
           ${filtered.map((member, index) => `
             <tr>
-              <td><strong>${index + 1}</strong></td>
-              <td>
+              <td class="col-no"><strong>${index + 1}</strong></td>
+              <td class="col-person">
                 <div class="font-medium">${member.name}</div>
                 <small class="text-muted">ID: ${member.id}</small>
               </td>
-              <td>
+              <td class="col-type">
                 <span class="badge ${roleBadgeClasses[member.role] || 'badge-gray'}">${member.role || 'Personil'}</span>
                 <div style="font-size: 12px; font-weight: 500; margin-top: 2px;">${member.position || '-'}</div>
               </td>
-              <td><i data-lucide="phone" style="width: 14px; height: 14px; vertical-align: middle;"></i> ${member.phone || '-'}</td>
-              <td><i data-lucide="mail" style="width: 14px; height: 14px; vertical-align: middle;"></i> ${member.email || '-'}</td>
-              <td><i data-lucide="building-2" style="width: 14px; height: 14px; vertical-align: middle;"></i> ${member.company || '-'}</td>
-              <td style="text-align: right;">
+              <td class="col-date"><i data-lucide="phone" style="width: 14px; height: 14px; vertical-align: middle;"></i> ${member.phone || '-'}</td>
+              <td class="col-person"><i data-lucide="mail" style="width: 14px; height: 14px; vertical-align: middle;"></i> ${member.email || '-'}</td>
+              <td class="col-asset"><i data-lucide="building-2" style="width: 14px; height: 14px; vertical-align: middle;"></i> ${member.company || '-'}</td>
+              <td class="col-actions">
                 <div class="btn-group" style="justify-content: flex-end;">
                   <button class="btn btn-icon btn-sm btn-outline-secondary" title="Edit Personil" onclick="window.openTeamModal('${member.id}')">
                     <i data-lucide="edit"></i>
@@ -213,6 +213,7 @@ window.deleteTeamMember = function(id) {
   let team = StorageManager.getTeam();
   team = team.filter(m => m.id !== id);
   StorageManager.saveTeam(team);
+  StorageManager.deleteFromSupabase('teams', id);
 
   showToast('Personil tim berhasil dihapus!', 'info');
   renderTeam();

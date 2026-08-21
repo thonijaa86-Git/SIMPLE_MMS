@@ -144,16 +144,16 @@ function renderRecentWorkOrders(workOrders) {
 
     return `
       <tr>
-        <td><strong>${index + 1}</strong></td>
-        <td><strong>${wo.id}</strong></td>
-        <td>
+        <td class="col-no"><strong>${index + 1}</strong></td>
+        <td class="col-id"><strong>${wo.id}</strong></td>
+        <td class="col-title">
           <div class="font-medium">${wo.title}</div>
           <small class="text-muted">${wo.assetName}</small>
         </td>
-        <td><span class="${priorityClasses[wo.priority] || ''}">${wo.priority}</span></td>
-        <td><span class="badge ${statusClasses[wo.status] || ''}">${wo.status}</span></td>
-        <td>${wo.assignedTech || '-'}</td>
-        <td>${formatDate(wo.createdDate)}</td>
+        <td class="col-priority"><span class="${priorityClasses[wo.priority] || ''}">${wo.priority}</span></td>
+        <td class="col-status"><span class="badge ${statusClasses[wo.status] || ''}">${wo.status}</span></td>
+        <td class="col-tech">${wo.assignedTech || '-'}</td>
+        <td class="col-date">${formatDate(wo.createdDate)}</td>
       </tr>
     `;
   }).join('');

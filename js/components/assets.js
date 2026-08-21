@@ -59,15 +59,15 @@ export function renderAssets() {
       <table class="table table-hover">
         <thead>
           <tr>
-            <th style="width: 50px;">NO</th>
-            <th>NO ASET</th>
-            <th>LOKASI</th>
-            <th>KATEGORI</th>
-            <th>NAMA ASET</th>
-            <th>SPESIFIKASI</th>
-            <th>THN PEMBUATAN</th>
-            <th>THN INSTALASI</th>
-            <th style="text-align: right;">AKSI</th>
+            <th class="col-no">NO</th>
+            <th class="col-id">NO ASET</th>
+            <th class="col-main">NAMA ASET</th>
+            <th class="col-category">KATEGORI</th>
+            <th class="col-asset">LOKASI</th>
+            <th class="col-main">SPESIFIKASI</th>
+            <th class="col-date">THN BUAT</th>
+            <th class="col-date multiline-header">THN<br>INSTALASI</th>
+            <th class="col-actions">AKSI</th>
           </tr>
         </thead>
         <tbody>
@@ -77,15 +77,15 @@ export function renderAssets() {
 
             return `
               <tr>
-                <td><strong>${index + 1}</strong></td>
-                <td><strong style="color: var(--primary-color);">${asset.id}</strong></td>
-                <td><small><i data-lucide="map-pin"></i> ${asset.location}</small></td>
-                <td><span class="badge badge-gray">${asset.category}</span></td>
-                <td><div style="font-weight: 600;">${asset.name}</div></td>
-                <td><small style="color: var(--text-muted);">${asset.specifications || asset.manufacturer || (asset.serialNumber ? 'SN: ' + asset.serialNumber : '-')}</small></td>
-                <td><small>${yearMade}</small></td>
-                <td><small>${yearInstalled}</small></td>
-                <td style="text-align: right;">
+                <td class="col-no"><strong>${index + 1}</strong></td>
+                <td class="col-id"><strong style="color: var(--primary-color);">${asset.id}</strong></td>
+                <td class="col-main"><div style="font-weight: 600;">${asset.name}</div></td>
+                <td class="col-category"><span class="badge badge-gray">${asset.category}</span></td>
+                <td class="col-asset"><small><i data-lucide="map-pin"></i> ${asset.location}</small></td>
+                <td class="col-main"><small style="color: var(--text-muted);">${asset.specifications || asset.manufacturer || (asset.serialNumber ? 'SN: ' + asset.serialNumber : '-')}</small></td>
+                <td class="col-date"><small>${yearMade}</small></td>
+                <td class="col-date"><small>${yearInstalled}</small></td>
+                <td class="col-actions">
                   <div class="btn-group" style="justify-content: flex-end;">
                     <button class="btn btn-icon btn-sm btn-outline-secondary" title="Edit Aset" onclick="window.openAssetModal('${asset.id}')">
                       <i data-lucide="edit"></i>
@@ -372,14 +372,7 @@ window.deleteAsset = function (assetId) {
   assets = assets.filter(a => a.id !== assetId);
 
   StorageManager.saveAssets(assets);
-
-  // Delete from Supabase cloud database if configured
-  const client = StorageManager.getSupabaseClient ? StorageManager.getSupabaseClient() : null;
-  if (client) {
-    client.from('assets').delete().eq('id', assetId).then(({ error }) => {
-      if (error) console.error('Supabase delete asset error:', error);
-    });
-  }
+  StorageManager.deleteFromSupabase('assets', assetId);
 
   showToast(`Aset ${assetId} berhasil dihapus`, 'success');
   renderAssets();
