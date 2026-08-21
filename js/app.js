@@ -19,6 +19,23 @@ import { renderTechDashboard, renderTechWorkOrders, setupTechListeners } from '.
 let currentView = 'dashboard';
 
 document.addEventListener('DOMContentLoaded', async () => {
+  // Auth Guard: Cek apakah user sudah login
+  const authUserStr = localStorage.getItem('mms_auth_user');
+  if (!authUserStr) {
+    window.location.href = 'login.html';
+    return;
+  }
+
+  try {
+    const authUser = JSON.parse(authUserStr);
+    const userEmailEl = document.getElementById('user-email-text');
+    if (userEmailEl && authUser?.email) {
+      userEmailEl.textContent = authUser.email.split('@')[0];
+    }
+  } catch (e) {
+    console.error('Error parsing auth user', e);
+  }
+
   // Initialize & fetch Storage Data from Supabase
   await StorageManager.init();
 
@@ -45,6 +62,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Initial View Render
   navigateTo('dashboard');
 });
+
+// Logout Handler
+window.logoutUser = function() {
+  localStorage.removeItem('mms_auth_user');
+  window.location.href = 'login.html';
+};
+
 
 // View Navigation Router
 export function navigateTo(viewName) {
